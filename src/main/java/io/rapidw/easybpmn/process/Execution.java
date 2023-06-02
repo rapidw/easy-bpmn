@@ -1,28 +1,68 @@
 package io.rapidw.easybpmn.process;
 
-import io.rapidw.easybpmn.process.model.FlowElement;
+import io.rapidw.easybpmn.model.FlowElement;
 import io.rapidw.easybpmn.service.TaskService;
 import io.rapidw.easybpmn.task.TaskQuery;
-import lombok.Builder;
-import lombok.Data;
-import lombok.ToString;
+import jakarta.persistence.*;
+import lombok.*;
+import lombok.extern.slf4j.Slf4j;
 
-@Data
-public class Execution {
-//    private Integer id;
+import java.util.ArrayList;
+import java.util.List;
+
+@Slf4j
+@Entity
+@Table(name = "execution")
+@NoArgsConstructor
+public class Execution implements HasId {
+
+    @Id
+    @GeneratedValue
+    @Getter
+    private Integer id;
+
     @ToString.Exclude
-    private final ProcessInstance<?> processInstance;
+    @ManyToOne
+    @Getter
+    private ProcessInstance processInstance;
+
+    @Transient
+    @Getter
     private TaskService taskService;
-    private final FlowElement currentFlowElement;
+
+    // flowElement id persist??
+    @Transient
+    @Getter
+    @Setter
+    private FlowElement currentFlowElement;
+
+    @ManyToOne
+    @Getter
+    private Execution parent;
+
+    @OneToMany
+    private List<Execution> children;
+
+    @Getter
+    @Setter
+    private boolean active;
 
     @Builder
-    public Execution(ProcessInstance<?> processInstance, FlowElement initialFlowElement) {
+    public Execution(ProcessInstance processInstance, FlowElement initialFlowElement, Execution parent, boolean active) {
         this.processInstance = processInstance;
-        this.taskService = processInstance.getProcessDefinition().getProcessEngine().getTaskService();
+        this.taskService = processInstance.getProcessEngine().getTaskService();
         this.currentFlowElement = initialFlowElement;
+        this.parent = parent;
+        this.children = new ArrayList<>();
+        this.active = active;
     }
 
-    public TaskInstance<?, ?> queryTask(TaskQuery taskQuery) {
+    public TaskInstance queryTask(TaskQuery taskQuery) {
         return null;
     }
+
+    public void addChild(Execution execution) {
+        this.children.add(execution);
+    }
+
 }

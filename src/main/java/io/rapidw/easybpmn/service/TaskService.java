@@ -7,7 +7,7 @@ import java.util.List;
 
 public class TaskService {
 
-    public List<TaskInstance<?, ?>> queryTask(TaskQuery taskQuery) {
+    public List<TaskInstance> queryTask(TaskQuery taskQuery) {
         return null;
     }
 }

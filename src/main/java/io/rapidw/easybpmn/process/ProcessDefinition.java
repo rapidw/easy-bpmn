@@ -1,30 +1,33 @@
 package io.rapidw.easybpmn.process;
 
-import io.rapidw.easybpmn.ProcessEngine;
-import io.rapidw.easybpmn.process.model.Process;
+import io.rapidw.easybpmn.model.Process;
+import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Data
-public class ProcessDefinition {
-    private ProcessEngine processEngine;
+@Slf4j
+@Entity
+@NoArgsConstructor
+@Table(name = "process_definition")
+public class ProcessDefinition implements HasId {
 
+    @Id
+    @GeneratedValue
     private Integer id;
     private String name;
     private Boolean active;
 
+    @Transient
     private Process process;
 
     @Builder
-    public ProcessDefinition(ProcessEngine processEngine, Process process, String name, Boolean active) {
-        this.processEngine = processEngine;
+    public ProcessDefinition(Process process, String name, Boolean active) {
         this.process = process;
         this.name = name;
         this.active = active;
-    }
-
-    public <T> ProcessInstance<T> startProcessInstance(T variable) {
-        return new ProcessInstance<>(processEngine, this, variable);
     }
 
     public void suspend() {
