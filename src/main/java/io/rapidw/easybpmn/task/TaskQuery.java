@@ -1,6 +1,6 @@
 package io.rapidw.easybpmn.task;
 
-import io.rapidw.easybpmn.process.ProcessInstance;
+import io.rapidw.easybpmn.engine.runtime.ProcessInstance;
 import lombok.Builder;
 import lombok.Data;
 import lombok.experimental.Accessors;

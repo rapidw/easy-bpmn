@@ -1,15 +1,12 @@
 package io.rapidw.easybpmn;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.rapidw.easybpmn.process.ProcessDefinition;
-import io.rapidw.easybpmn.process.ProcessInstance;
-import io.rapidw.easybpmn.process.TaskInstance;
-import io.rapidw.easybpmn.process.Variable;
-import io.rapidw.easybpmn.process.operation.Operation;
-import io.rapidw.easybpmn.service.HistoryService;
-import io.rapidw.easybpmn.service.ProcessInstanceService;
-import io.rapidw.easybpmn.service.RuntimeService;
-import io.rapidw.easybpmn.service.TaskService;
+import io.rapidw.easybpmn.engine.runtime.ProcessDefinition;
+import io.rapidw.easybpmn.engine.runtime.DeploymentQuery;
+import io.rapidw.easybpmn.engine.runtime.ProcessInstance;
+import io.rapidw.easybpmn.engine.runtime.TaskInstance;
+import io.rapidw.easybpmn.engine.runtime.operation.Operation;
+import io.rapidw.easybpmn.engine.service.*;
 import io.rapidw.easybpmn.task.TaskQuery;
 import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.Persistence;
@@ -27,6 +24,7 @@ public class ProcessEngine {
     private final EntityManagerFactory entityManagerFactory;
     @Getter
     private ObjectMapper objectMapper;
+    private ProcessRegistry processRegistry;
 
     @Getter
     private final RuntimeService runtimeService;
@@ -35,18 +33,22 @@ public class ProcessEngine {
     private final HistoryService historyService;
     @Getter
     private ProcessInstanceService processInstanceService;
+    @Getter
+    private ProcessDefinitionService processDefinitionService;
 
     private final LinkedBlockingQueue<Operation> operations;
     private final Thread worker;
 
-    public ProcessEngine(ProcessEngineConfig config) {
+    public ProcessEngine(ProcessRegistry processRegistry, ProcessEngineConfig config) {
         this.entityManagerFactory = Persistence.createEntityManagerFactory("easy-bpmn");
         this.objectMapper = new ObjectMapper();
 
+        this.processRegistry = processRegistry;
         this.runtimeService = new RuntimeService(entityManagerFactory);
         this.taskService = new TaskService();
         this.historyService = new HistoryService();
         this.processInstanceService = new ProcessInstanceService(entityManagerFactory);
+        this.processDefinitionService = new ProcessDefinitionService(entityManagerFactory);
 
         operations = new LinkedBlockingQueue<>();
 
@@ -73,9 +75,14 @@ public class ProcessEngine {
         }
     }
 
-    public ProcessInstance startProcessInstance(ProcessDefinition processDefinition, Variable variable) {
-        log.info("start process instance by process definition");
-        val processInstance = new ProcessInstance(this, processDefinition, variable);
+    public ProcessInstance startProcessInstanceById(Integer id, Object variable) {
+        log.info("start process instance by process id");
+        val deployments = this.processRegistry.query(DeploymentQuery.builder().id(id).build());
+        if (deployments.size() != 1) {
+            throw new ProcessEngineException("invalid deployment id");
+        }
+        val definition = ProcessDefinition.builder().processEngine(this).deployment(deployments.get(0)).build();
+        val processInstance = new ProcessInstance(this, definition, variable);
         this.getProcessInstanceService().persistAndGetId(processInstance);
         processInstance.start();
         return processInstance;

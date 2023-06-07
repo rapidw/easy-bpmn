@@ -5,10 +5,10 @@
 
     <persistence-unit name="easy-bpmn">
 
-        <class>io.rapidw.easybpmn.Deployment</class>
-        <class>io.rapidw.easybpmn.process.ProcessInstance</class>
-        <class>io.rapidw.easybpmn.process.ProcessDefinition</class>
-        <class>io.rapidw.easybpmn.process.Execution</class>
+        <class>io.rapidw.easybpmn.registry.Deployment</class>
+        <class>io.rapidw.easybpmn.engine.runtime.ProcessInstance</class>
+        <class>io.rapidw.easybpmn.engine.runtime.ProcessDefinition</class>
+        <class>io.rapidw.easybpmn.engine.runtime.Execution</class>
 
         <properties>
             <property name="jakarta.persistence.jdbc.driver" value="org.h2.Driver" />
@@ -18,8 +18,8 @@
             <property name="jakarta.persistence.schema-generation.database.action" value="drop-and-create"/>
 
             <property name="hibernate.show_sql" value="true" />
-<!--            <property name="hibernate.format_sql" value="true"/>-->
-<!--            <property name="hibernate.use_sql_comments" value="true"/>-->
+            <property name="hibernate.format_sql" value="true"/>
+            <property name="hibernate.use_sql_comments" value="true"/>
             <property name="hibernate.hbm2ddl.auto" value="create" />
             <property name="hibernate.dialect" value="org.hibernate.dialect.H2Dialect"/>
         </properties>
