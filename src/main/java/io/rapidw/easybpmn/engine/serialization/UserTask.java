@@ -1,9 +1,10 @@
 package io.rapidw.easybpmn.engine.serialization;
 
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 @Data
-public class UserTask {
-    private String id;
+@EqualsAndHashCode(callSuper = true)
+public class UserTask extends FlowElement{
     private String name;
 }

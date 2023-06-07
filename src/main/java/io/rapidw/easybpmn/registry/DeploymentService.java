@@ -2,7 +2,6 @@ package io.rapidw.easybpmn.registry;
 
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.jpa.impl.JPAQuery;
-import io.rapidw.easybpmn.QDeployment;
 import io.rapidw.easybpmn.engine.runtime.DeploymentQuery;
 import io.rapidw.easybpmn.engine.service.AbstractRepositoryService;
 import jakarta.persistence.EntityManagerFactory;

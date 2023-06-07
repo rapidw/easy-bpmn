@@ -1,8 +1,11 @@
 package io.rapidw.easybpmn.engine.serialization;
 
+
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 @Data
-public class StartEvent {
-    private String id;
+@EqualsAndHashCode(callSuper = true)
+public class StartEvent extends FlowElement {
+
 }

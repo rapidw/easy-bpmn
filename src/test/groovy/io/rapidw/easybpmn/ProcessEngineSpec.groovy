@@ -35,14 +35,16 @@ class ProcessEngineSpec extends Specification {
 
         def startEvent = new StartEvent();
         startEvent.setId("startEvent")
-        process.setStartEvent(startEvent)
+        process.getFlowElements().add(startEvent)
 
         def endEvent = new EndEvent()
         endEvent.setId("endEvent")
+        process.getFlowElements().add(endEvent)
 
         def userTask = new UserTask()
         userTask.setId("user_task_id")
         userTask.setName("user_task_name")
+        process.getFlowElements().add(userTask)
 
         def sf1 = new SequenceFlow()
         sf1.setId("sf1")
@@ -61,11 +63,13 @@ class ProcessEngineSpec extends Specification {
         def str = objectMapper.writeValueAsString(bpmn)
         println str
 
-        def engineConfig = ProcessEngineConfig.builder().build()
-        def engine = new ProcessEngine(engineConfig)
+//        def another_process = objectMapper.readValue(str, Bpmn.class)
 
         def registryConfig = new ProcessRegistryConfig()
         def registry = new ProcessRegistry(registryConfig)
+
+        def engineConfig = ProcessEngineConfig.builder().build()
+        def engine = new ProcessEngine(registry, engineConfig)
 
         def processDefinition = registry.deploy(str)
 

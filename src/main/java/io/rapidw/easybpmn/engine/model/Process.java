@@ -1,9 +1,10 @@
 package io.rapidw.easybpmn.engine.model;
 
-import jakarta.persistence.Embeddable;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.util.List;
 import java.util.Map;
@@ -11,10 +12,10 @@ import java.util.Map;
 /**
  *
  */
-@Data
-@EqualsAndHashCode(callSuper = true)
-@Embeddable
+//@EqualsAndHashCode(callSuper = true)
 @NoArgsConstructor
+@Getter
+@Setter
 public class Process extends FlowElementContainer implements CallableElement {
 
     // name in CallableElement is moved to Process to avoid multiple inheritance
@@ -35,11 +36,13 @@ public class Process extends FlowElementContainer implements CallableElement {
 //    private List<Collaboration> definitionalCollaborationRef;
 
     // for implementation
+
+
     private FlowElement initialFlowElement;
-    private List<FlowElement> flowElements;
+//    private final List<FlowElement> flowElements = Lists.newArrayList();
     // map key: element id
-    private Map<String, FlowElement> flowElementMap;
-    private List<SequenceFlow> sequenceFlows;
+    private Map<String, FlowElement> flowElementMap = Maps.newHashMap();
+    private List<SequenceFlow> sequenceFlows = Lists.newArrayList();
 //    private List<>
 
 //    @Builder

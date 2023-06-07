@@ -48,7 +48,7 @@ public class ProcessEngine {
         this.taskService = new TaskService();
         this.historyService = new HistoryService();
         this.processInstanceService = new ProcessInstanceService(entityManagerFactory);
-        this.processDefinitionService = new ProcessDefinitionService(entityManagerFactory);
+        this.processDefinitionService = new ProcessDefinitionService();
 
         operations = new LinkedBlockingQueue<>();
 

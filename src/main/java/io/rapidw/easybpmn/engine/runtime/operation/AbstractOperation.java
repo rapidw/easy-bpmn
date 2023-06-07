@@ -2,10 +2,10 @@ package io.rapidw.easybpmn.engine.runtime.operation;
 
 import com.querydsl.jpa.impl.JPAQuery;
 import io.rapidw.easybpmn.ProcessEngine;
-import io.rapidw.easybpmn.engine.runtime.ProcessInstance;
 import io.rapidw.easybpmn.engine.runtime.Execution;
 import io.rapidw.easybpmn.engine.runtime.ProcessDefinition;
-import io.rapidw.easybpmn.process.QExecution;
+import io.rapidw.easybpmn.engine.runtime.ProcessInstance;
+import io.rapidw.easybpmn.engine.runtime.QExecution;
 import jakarta.persistence.EntityManager;
 
 public abstract class AbstractOperation implements Operation {

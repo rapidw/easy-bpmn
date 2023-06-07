@@ -72,7 +72,7 @@ public class ProcessInstance implements HasId {
         val execution = Execution.builder().processInstance(this).initialFlowElement(init).build();
 
         processEngine.addOperation(ContinueProcessOperation.builder()
-            .processDefinitionId(processDefinition.getId())
+//            .processDefinitionId(processDefinition.getId())
             .processInstanceId(this.getId())
             .executionId(execution.getId())
             .build());
