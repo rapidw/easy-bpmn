@@ -2,14 +2,14 @@ package io.rapidw.easybpmn.engine.runtime.operation;
 
 
 import io.rapidw.easybpmn.ProcessEngineException;
-import io.rapidw.easybpmn.engine.model.Event;
-import io.rapidw.easybpmn.engine.model.FlowNode;
-import io.rapidw.easybpmn.engine.model.SequenceFlow;
-import io.rapidw.easybpmn.engine.model.StartEvent;
+import io.rapidw.easybpmn.engine.model.*;
+import io.rapidw.easybpmn.engine.runtime.TaskInstance;
 import lombok.experimental.SuperBuilder;
+import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 
 @SuperBuilder
+@Slf4j
 public class ContinueProcessOperation extends AbstractOperation {
 
     @Override
@@ -28,12 +28,27 @@ public class ContinueProcessOperation extends AbstractOperation {
     private void handleFlowNode(FlowNode flowNode) {
         if (flowNode instanceof Event event) {
             if (event instanceof StartEvent startEvent) {
-                planTakeOutgoingSequenceFlowsOperation();
+                planTakeOutgoingSequenceFlowsOperation(this.execution);
             }
+        } else if (flowNode instanceof Activity activity) {
+            handleActivity(activity);
         }
     }
 
     private void handleSequenceFlow(SequenceFlow sequenceFlow) {
+        this.execution.setCurrentFlowElement(sequenceFlow.getTargetRef());
+        this.processEngine.getExecutionRepository().merge(this.execution);
+        planContinueProcessOperation(this.execution);
+    }
 
+    private void handleActivity(Activity activity) {
+        if (activity instanceof UserTask userTask) {
+            val taskInstance = TaskInstance.builder()
+                .processInstance(processInstance)
+                .execution(execution)
+                .userTask(userTask)
+                .build();
+            this.processEngine.getTaskRepository().persistAndGetId(taskInstance);
+        }
     }
 }

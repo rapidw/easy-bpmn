@@ -22,6 +22,7 @@ import lombok.val;
 public class ProcessDefinition {
     private ProcessEngine processEngine;
 
+    private Integer id;
     private Deployment deployment;
     private Process process;
 
@@ -29,6 +30,7 @@ public class ProcessDefinition {
     public ProcessDefinition(ProcessEngine processEngine, Deployment deployment) {
         this.processEngine = processEngine;
         this.deployment = deployment;
+        this.id = deployment.getId();
         buildModel();
     }
 
@@ -74,6 +76,7 @@ public class ProcessDefinition {
             } else {
                 throw new ProcessEngineException("source or target not instance of FlowNode");
             }
+            processModel.getFlowElementMap().put(model.getId(), model);
         });
         this.process = processModel;
     }

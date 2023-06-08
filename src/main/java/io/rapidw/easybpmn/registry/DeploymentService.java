@@ -3,7 +3,7 @@ package io.rapidw.easybpmn.registry;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.jpa.impl.JPAQuery;
 import io.rapidw.easybpmn.engine.runtime.DeploymentQuery;
-import io.rapidw.easybpmn.engine.service.AbstractRepositoryService;
+import io.rapidw.easybpmn.engine.repository.AbstractRepository;
 import jakarta.persistence.EntityManagerFactory;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
@@ -11,7 +11,7 @@ import lombok.val;
 import java.util.List;
 
 @Slf4j
-public class DeploymentService extends AbstractRepositoryService<Deployment> {
+public class DeploymentService extends AbstractRepository<Deployment> {
 
     public DeploymentService(EntityManagerFactory entityManagerFactory) {
         super(entityManagerFactory);

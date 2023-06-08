@@ -19,7 +19,7 @@ public class Deployment implements HasId {
     }
 
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
     private String name;
@@ -27,5 +27,6 @@ public class Deployment implements HasId {
 //    private List<String> classpathResource;
 
     @Lob
+    @Column(columnDefinition = "TEXT")
     private String model;
 }

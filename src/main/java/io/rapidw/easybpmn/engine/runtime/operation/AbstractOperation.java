@@ -1,20 +1,18 @@
 package io.rapidw.easybpmn.engine.runtime.operation;
 
-import com.querydsl.jpa.impl.JPAQuery;
 import io.rapidw.easybpmn.ProcessEngine;
 import io.rapidw.easybpmn.engine.runtime.Execution;
 import io.rapidw.easybpmn.engine.runtime.ProcessDefinition;
 import io.rapidw.easybpmn.engine.runtime.ProcessInstance;
-import io.rapidw.easybpmn.engine.runtime.QExecution;
-import jakarta.persistence.EntityManager;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 public abstract class AbstractOperation implements Operation {
 
     private Integer processDefinitionId;
     private Integer processInstanceId;
     private Integer executionId;
     protected ProcessEngine processEngine;
-    protected EntityManager entityManager;
     protected ProcessDefinition processDefinition;
     protected ProcessInstance processInstance;
     protected Execution execution;
@@ -28,12 +26,12 @@ public abstract class AbstractOperation implements Operation {
     @Override
     public void execute(ProcessEngine processEngine) {
         this.processEngine = processEngine;
-        this.entityManager = processEngine.getEntityManagerFactory().createEntityManager();
         this.processDefinition = getProcessDefinition();
         this.processInstance = getProcessInstance();
         this.execution = getExecution();
+        this.execution.setCurrentFlowElement(this.processDefinition.getProcess().getFlowElementMap().get(this.execution.getCurrentFlowElement().getId()));
+        log.debug("execute operation: {}, current flow element {}", this.getClass().getSimpleName(), this.execution.getCurrentFlowElement().getId());
         execute();
-        this.entityManager.close();
     }
 
     public abstract void execute();
@@ -48,20 +46,16 @@ public abstract class AbstractOperation implements Operation {
         planOperation(TakeOutgoingSequenceFlowOperation.builder()
             .processDefinitionId(processDefinitionId)
             .processInstanceId(processInstanceId)
-            .executionId(executionId)
+            .executionId(execution.getId())
             .build());
     }
 
-    protected void planContinueProcessOperation() {
+    protected void planContinueProcessOperation(Execution execution) {
         planOperation(ContinueProcessOperation.builder()
             .processDefinitionId(processDefinitionId)
             .processInstanceId(processInstanceId)
-            .executionId(executionId)
+            .executionId(execution.getId())
             .build());
-    }
-
-    protected void planTakeOutgoingSequenceFlowsOperation() {
-        planTakeOutgoingSequenceFlowsOperation(execution);
     }
 
     private void planOperation(Operation operation) {
@@ -69,17 +63,15 @@ public abstract class AbstractOperation implements Operation {
     }
 
     protected ProcessDefinition getProcessDefinition() {
-        return null;
+        return this.processEngine.getProcessDefinitionService().get(this.processDefinitionId);
     }
 
     protected ProcessInstance getProcessInstance() {
-        return null;
+        return this.processEngine.getProcessInstanceRepository().get(this.processInstanceId);
     }
 
     protected Execution getExecution() {
-        JPAQuery<Execution> executionJPAQuery = new JPAQuery<>(this.entityManager);
-        QExecution qExecution = QExecution.execution;
-        return executionJPAQuery.from(qExecution).where(qExecution.processInstance.id.eq(this.processInstanceId)).fetchOne();
+        return this.processEngine.getExecutionRepository().get(this.processInstanceId, this.executionId);
     }
 
     public static abstract class AbstractOperationBuilder<C extends AbstractOperation, B extends AbstractOperationBuilder<C, B>> {
@@ -88,6 +80,7 @@ public abstract class AbstractOperation implements Operation {
         private Integer executionId;
 
         public B processDefinitionId(Integer processDefinitionId) {
+
             this.processDefinitionId = processDefinitionId;
             return self();
         }

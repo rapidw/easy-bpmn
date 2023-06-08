@@ -1,4 +1,4 @@
-package io.rapidw.easybpmn.engine.service;
+package io.rapidw.easybpmn.engine.repository;
 
 import jakarta.persistence.EntityManagerFactory;
 

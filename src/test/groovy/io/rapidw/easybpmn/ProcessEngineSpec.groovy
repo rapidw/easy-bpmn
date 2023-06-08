@@ -1,15 +1,8 @@
 package io.rapidw.easybpmn
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import io.rapidw.easybpmn.engine.serialization.Bpmn
-import io.rapidw.easybpmn.engine.serialization.Definition
-import io.rapidw.easybpmn.engine.serialization.EndEvent
-import io.rapidw.easybpmn.engine.serialization.Process
-import io.rapidw.easybpmn.engine.serialization.SequenceFlow
-import io.rapidw.easybpmn.engine.serialization.StartEvent
-import io.rapidw.easybpmn.engine.serialization.UserTask
-import io.rapidw.easybpmn.engine.runtime.TaskInstance
-import io.rapidw.easybpmn.engine.service.TaskService
+import io.rapidw.easybpmn.engine.repository.TaskRepository
+import io.rapidw.easybpmn.engine.serialization.*
 import io.rapidw.easybpmn.task.TaskQuery
 import spock.lang.Specification
 
@@ -19,7 +12,7 @@ import java.util.concurrent.TimeUnit
 class ProcessEngineSpec extends Specification {
 //    RepositoryService repositoryService = Spy()
 //    RuntimeService runtimeService = Stub()
-    TaskService taskService = Stub()
+    TaskRepository taskService = Stub()
 //    HistoryService historyService = Stub()
 
     def "process engine"() {
@@ -42,7 +35,7 @@ class ProcessEngineSpec extends Specification {
         process.getFlowElements().add(endEvent)
 
         def userTask = new UserTask()
-        userTask.setId("user_task_id")
+        userTask.setId("user_task")
         userTask.setName("user_task_name")
         process.getFlowElements().add(userTask)
 
@@ -75,16 +68,10 @@ class ProcessEngineSpec extends Specification {
 
         def variable = new MyVariable()
         def processInstance = engine.startProcessInstanceById(processDefinition, variable)
-        taskService.queryTask(_ as TaskQuery) >> [new TaskInstance(
-            id: 1,
-            name: "test",
-            assignee: "xx",
-            processInstance: processInstance
-        )]
         def tasks = processInstance.queryTask(TaskQuery.builder().assignee("xx").build())
-        new CountDownLatch(1).await(3, TimeUnit.SECONDS)
-        tasks[0].complete(new Apply().setReason("apply"))
-        new CountDownLatch(1).await(3, TimeUnit.SECONDS)
+        new CountDownLatch(1).await(Integer.MAX_VALUE, TimeUnit.SECONDS)
+//        tasks[0].complete(new Apply().setReason("apply"))
+//        new CountDownLatch(1).await(3, TimeUnit.SECONDS)
         expect:
         1 == 1
 

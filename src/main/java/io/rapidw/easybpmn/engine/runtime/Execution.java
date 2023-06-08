@@ -1,7 +1,7 @@
 package io.rapidw.easybpmn.engine.runtime;
 
 import io.rapidw.easybpmn.engine.model.FlowElement;
-import io.rapidw.easybpmn.engine.service.TaskService;
+import io.rapidw.easybpmn.engine.repository.TaskRepository;
 import io.rapidw.easybpmn.task.TaskQuery;
 import jakarta.persistence.*;
 import lombok.*;
@@ -17,23 +17,25 @@ import java.util.List;
 public class Execution implements HasId {
 
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Getter
     private Integer id;
 
     @ToString.Exclude
     @ManyToOne
     @Getter
+    @JoinColumn(name = "process_instance_id")
     private ProcessInstance processInstance;
 
     @Transient
     @Getter
-    private TaskService taskService;
+    private TaskRepository taskRepository;
 
     // flowElement id persist??
-    @Transient
     @Getter
     @Setter
+    @Embedded
+    @AttributeOverride(name = "id", column = @Column(name = "current_flow_element_id"))
     private FlowElement currentFlowElement;
 
     @ManyToOne
@@ -50,7 +52,7 @@ public class Execution implements HasId {
     @Builder
     public Execution(ProcessInstance processInstance, FlowElement initialFlowElement, Execution parent, boolean active) {
         this.processInstance = processInstance;
-        this.taskService = processInstance.getProcessEngine().getTaskService();
+        this.taskRepository = processInstance.getProcessEngine().getTaskRepository();
         this.currentFlowElement = initialFlowElement;
         this.parent = parent;
         this.children = new ArrayList<>();

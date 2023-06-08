@@ -1,6 +1,5 @@
 package io.rapidw.easybpmn.engine.model;
 
-import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -42,7 +41,7 @@ public class Process extends FlowElementContainer implements CallableElement {
 //    private final List<FlowElement> flowElements = Lists.newArrayList();
     // map key: element id
     private Map<String, FlowElement> flowElementMap = Maps.newHashMap();
-    private List<SequenceFlow> sequenceFlows = Lists.newArrayList();
+//    private List<SequenceFlow> sequenceFlows = Lists.newArrayList();
 //    private List<>
 
 //    @Builder

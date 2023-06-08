@@ -26,7 +26,7 @@ public class ProcessInstance implements HasId {
 
     @Getter
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
     @Getter
@@ -52,8 +52,12 @@ public class ProcessInstance implements HasId {
         this.executions = new LinkedList<>();
 
         this.processDefinition = processDefinition;
-        val execution = Execution.builder().processInstance(this)
-            .initialFlowElement(processDefinition.getProcess().getInitialFlowElement()).build();
+        val execution = Execution.builder()
+            .processInstance(this)
+            .initialFlowElement(processDefinition.getProcess().getInitialFlowElement())
+            .active(true)
+            .parent(null)
+            .build();
         this.executions.add(execution);
 
         this.variable = new Variable();
@@ -67,15 +71,13 @@ public class ProcessInstance implements HasId {
 
     public void start() {
         log.info("start process instance");
-        val init = this.processDefinition.getProcess().getInitialFlowElement();
-
-        val execution = Execution.builder().processInstance(this).initialFlowElement(init).build();
 
         processEngine.addOperation(ContinueProcessOperation.builder()
-//            .processDefinitionId(processDefinition.getId())
+            .processDefinitionId(this.processDefinition.getId())
             .processInstanceId(this.getId())
-            .executionId(execution.getId())
-            .build());
+            .executionId(this.executions.get(0).getId())
+            .build()
+        );
     }
 
     @SneakyThrows

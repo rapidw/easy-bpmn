@@ -17,7 +17,7 @@ public class TakeOutgoingSequenceFlowOperation extends AbstractOperation {
     public void execute() {
         val currentFlowElement = execution.getCurrentFlowElement();
 
-        log.debug("current flow element {}", currentFlowElement.getName());
+        log.debug("current flow element {}", currentFlowElement.getId());
         if (currentFlowElement instanceof FlowNode flowNode) {
             handleFlowNode(flowNode);
         } else if (currentFlowElement instanceof SequenceFlow sequenceFlow) {
@@ -26,20 +26,14 @@ public class TakeOutgoingSequenceFlowOperation extends AbstractOperation {
     }
 
     private void handleFlowNode(FlowNode flowNode) {
-//        if (flowNode instanceof Activity activity) {
-//            handleActivity(activity);
-//        } else if (flowNode instanceof Gateway gateway) {
-//            handleGateway(gateway);
-//        } else if (flowNode instanceof Event event) {
-//            handleSequenceFlow();
-//        }
-//        log.debug("current");
         val outgoingSequenceFlows = flowNode.getOutgoing();
         val outgoingExecutions = new ArrayList<Execution>(outgoingSequenceFlows.size());
 
         //reuse first execution
         execution.setCurrentFlowElement(outgoingSequenceFlows.get(0));
         execution.setActive(false);
+        this.processEngine.getExecutionRepository().merge(execution);
+
         outgoingExecutions.add(execution);
 
         if (outgoingSequenceFlows.size() > 1) {
@@ -57,10 +51,10 @@ public class TakeOutgoingSequenceFlowOperation extends AbstractOperation {
             }
         }
 
-        outgoingExecutions.forEach(this::planTakeOutgoingSequenceFlowsOperation);
+        outgoingExecutions.forEach(this::planContinueProcessOperation);
     }
 
     private void handleSequenceFlow(SequenceFlow sequenceFlow) {
-        planContinueProcessOperation();
+        planContinueProcessOperation(this.execution);
     }
 }
