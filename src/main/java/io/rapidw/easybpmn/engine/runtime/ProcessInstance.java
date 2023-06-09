@@ -66,7 +66,7 @@ public class ProcessInstance implements HasId {
     }
 
     public List<TaskInstance> queryTask(TaskQuery taskQuery) {
-        return processEngine.queryTask(taskQuery.setProcessInstance(this));
+        return processEngine.queryTask(taskQuery.setProcessInstanceId(this.id));
     }
 
     public void start() {

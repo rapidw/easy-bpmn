@@ -14,8 +14,6 @@ public class ContinueProcessOperation extends AbstractOperation {
 
     @Override
     public void execute() {
-
-        val currentFlowElement = execution.getCurrentFlowElement();
         if (currentFlowElement instanceof FlowNode flowNode) {
             handleFlowNode(flowNode);
         } else if (currentFlowElement instanceof SequenceFlow sequenceFlow) {
@@ -36,8 +34,8 @@ public class ContinueProcessOperation extends AbstractOperation {
     }
 
     private void handleSequenceFlow(SequenceFlow sequenceFlow) {
-        this.execution.setCurrentFlowElement(sequenceFlow.getTargetRef());
-        this.processEngine.getExecutionRepository().merge(this.execution);
+        this.execution.setCurrentFlowElementId(sequenceFlow.getTargetRef().getId());
+        this.processEngine.getExecutionRepository().merge(this.entityManager, this.execution);
         planContinueProcessOperation(this.execution);
     }
 
@@ -48,7 +46,7 @@ public class ContinueProcessOperation extends AbstractOperation {
                 .execution(execution)
                 .userTask(userTask)
                 .build();
-            this.processEngine.getTaskRepository().persistAndGetId(taskInstance);
+            this.processEngine.getTaskRepository().persistAndGetId(this.entityManager, taskInstance);
         }
     }
 }

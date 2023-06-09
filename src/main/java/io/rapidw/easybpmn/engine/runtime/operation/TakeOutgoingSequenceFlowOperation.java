@@ -15,8 +15,6 @@ public class TakeOutgoingSequenceFlowOperation extends AbstractOperation {
 
     @Override
     public void execute() {
-        val currentFlowElement = execution.getCurrentFlowElement();
-
         log.debug("current flow element {}", currentFlowElement.getId());
         if (currentFlowElement instanceof FlowNode flowNode) {
             handleFlowNode(flowNode);
@@ -30,9 +28,9 @@ public class TakeOutgoingSequenceFlowOperation extends AbstractOperation {
         val outgoingExecutions = new ArrayList<Execution>(outgoingSequenceFlows.size());
 
         //reuse first execution
-        execution.setCurrentFlowElement(outgoingSequenceFlows.get(0));
+        execution.setCurrentFlowElementId(outgoingSequenceFlows.get(0).getId());
         execution.setActive(false);
-        this.processEngine.getExecutionRepository().merge(execution);
+        this.processEngine.getExecutionRepository().merge(this.entityManager, execution);
 
         outgoingExecutions.add(execution);
 

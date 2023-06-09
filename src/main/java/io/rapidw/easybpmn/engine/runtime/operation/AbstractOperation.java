@@ -1,21 +1,25 @@
 package io.rapidw.easybpmn.engine.runtime.operation;
 
 import io.rapidw.easybpmn.ProcessEngine;
+import io.rapidw.easybpmn.engine.model.FlowElement;
 import io.rapidw.easybpmn.engine.runtime.Execution;
 import io.rapidw.easybpmn.engine.runtime.ProcessDefinition;
 import io.rapidw.easybpmn.engine.runtime.ProcessInstance;
+import jakarta.persistence.EntityManager;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-public abstract class AbstractOperation implements Operation {
+public abstract class AbstractOperation {
 
-    private Integer processDefinitionId;
-    private Integer processInstanceId;
-    private Integer executionId;
+    private final Integer processDefinitionId;
+    private final Integer processInstanceId;
+    private final Integer executionId;
     protected ProcessEngine processEngine;
+    protected EntityManager entityManager;
     protected ProcessDefinition processDefinition;
     protected ProcessInstance processInstance;
     protected Execution execution;
+    protected FlowElement currentFlowElement;
 
     protected AbstractOperation(AbstractOperationBuilder<?, ?> b) {
         this.processDefinitionId = b.processDefinitionId;
@@ -23,14 +27,14 @@ public abstract class AbstractOperation implements Operation {
         this.executionId = b.executionId;
     }
 
-    @Override
-    public void execute(ProcessEngine processEngine) {
+    public void execute(ProcessEngine processEngine, ThreadLocal<EntityManager> entityManagerThreadLocal) {
         this.processEngine = processEngine;
+        this.entityManager = entityManagerThreadLocal.get();
         this.processDefinition = getProcessDefinition();
         this.processInstance = getProcessInstance();
         this.execution = getExecution();
-        this.execution.setCurrentFlowElement(this.processDefinition.getProcess().getFlowElementMap().get(this.execution.getCurrentFlowElement().getId()));
-        log.debug("execute operation: {}, current flow element {}", this.getClass().getSimpleName(), this.execution.getCurrentFlowElement().getId());
+        this.currentFlowElement = this.processDefinition.getProcess().getFlowElementMap().get(this.execution.getCurrentFlowElementId());
+        log.debug("execute operation: {}, current flow element {}", this.getClass().getSimpleName(), this.execution.getCurrentFlowElementId());
         execute();
     }
 
@@ -58,7 +62,7 @@ public abstract class AbstractOperation implements Operation {
             .build());
     }
 
-    private void planOperation(Operation operation) {
+    private void planOperation(AbstractOperation operation) {
         processEngine.addOperation(operation);
     }
 
@@ -67,11 +71,11 @@ public abstract class AbstractOperation implements Operation {
     }
 
     protected ProcessInstance getProcessInstance() {
-        return this.processEngine.getProcessInstanceRepository().get(this.processInstanceId);
+        return this.processEngine.getProcessInstanceRepository().get(this.entityManager, this.processInstanceId);
     }
 
     protected Execution getExecution() {
-        return this.processEngine.getExecutionRepository().get(this.processInstanceId, this.executionId);
+        return this.processEngine.getExecutionRepository().get(this.entityManager, this.processInstanceId, this.executionId);
     }
 
     public static abstract class AbstractOperationBuilder<C extends AbstractOperation, B extends AbstractOperationBuilder<C, B>> {

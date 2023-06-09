@@ -1,16 +1,17 @@
 package io.rapidw.easybpmn.engine.runtime;
 
 import io.rapidw.easybpmn.engine.model.UserTask;
+import io.rapidw.easybpmn.engine.runtime.operation.TakeOutgoingSequenceFlowOperation;
 import jakarta.persistence.*;
 import lombok.Builder;
-import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-@Data
 @Entity
 @Slf4j
 @NoArgsConstructor
+@Table(name = "task_instance")
 public class TaskInstance implements HasId {
 
     @Builder
@@ -22,13 +23,15 @@ public class TaskInstance implements HasId {
         this.variable = variable;
     }
 
+    @Getter
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @Transient
+    @ManyToOne
     private ProcessInstance processInstance;
-    @Transient
+
+    @ManyToOne
     private Execution execution;
 
     @Embedded
@@ -41,6 +44,11 @@ public class TaskInstance implements HasId {
     private Variable variable;
 
     public void complete(Object variable) {
+        this.processInstance.getProcessEngine().addOperation(TakeOutgoingSequenceFlowOperation.builder()
+            .processInstanceId(processInstance.getId())
+            .executionId(execution.getId())
+            .processDefinitionId(processInstance.getProcessDefinition().getId())
+            .build());
         log.debug("completing task instance: {}", this.id);
     }
 }

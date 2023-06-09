@@ -34,9 +34,7 @@ public class Execution implements HasId {
     // flowElement id persist??
     @Getter
     @Setter
-    @Embedded
-    @AttributeOverride(name = "id", column = @Column(name = "current_flow_element_id"))
-    private FlowElement currentFlowElement;
+    private String currentFlowElementId;
 
     @ManyToOne
     @Getter
@@ -53,7 +51,7 @@ public class Execution implements HasId {
     public Execution(ProcessInstance processInstance, FlowElement initialFlowElement, Execution parent, boolean active) {
         this.processInstance = processInstance;
         this.taskRepository = processInstance.getProcessEngine().getTaskRepository();
-        this.currentFlowElement = initialFlowElement;
+        this.currentFlowElementId = initialFlowElement.getId();
         this.parent = parent;
         this.children = new ArrayList<>();
         this.active = active;

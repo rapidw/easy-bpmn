@@ -68,10 +68,11 @@ class ProcessEngineSpec extends Specification {
 
         def variable = new MyVariable()
         def processInstance = engine.startProcessInstanceById(processDefinition, variable)
-        def tasks = processInstance.queryTask(TaskQuery.builder().assignee("xx").build())
+        new CountDownLatch(1).await(1, TimeUnit.SECONDS)
+        def tasks = processInstance.queryTask(TaskQuery.builder().id(1).build())
+        new CountDownLatch(1).await(1, TimeUnit.SECONDS)
+        tasks[0].complete(new Apply().setReason("apply"))
         new CountDownLatch(1).await(Integer.MAX_VALUE, TimeUnit.SECONDS)
-//        tasks[0].complete(new Apply().setReason("apply"))
-//        new CountDownLatch(1).await(3, TimeUnit.SECONDS)
         expect:
         1 == 1
 

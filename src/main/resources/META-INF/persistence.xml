@@ -9,6 +9,7 @@
         <class>io.rapidw.easybpmn.engine.runtime.ProcessInstance</class>
         <class>io.rapidw.easybpmn.engine.runtime.ProcessDefinition</class>
         <class>io.rapidw.easybpmn.engine.runtime.Execution</class>
+        <class>io.rapidw.easybpmn.engine.runtime.TaskInstance</class>
 
         <properties>
 <!--            <property name="jakarta.persistence.jdbc.driver" value="org.h2.Driver" />-->
@@ -28,7 +29,7 @@
 <!--            <property name="hibernate.show_sql" value="true" />-->
 <!--            <property name="hibernate.format_sql" value="true"/>-->
 <!--            <property name="hibernate.use_sql_comments" value="true"/>-->
-            <property name="hibernate.hbm2ddl.auto" value="create" />
+            <property name="hibernate.hbm2ddl.auto" value="create-drop" />
 
         </properties>
 

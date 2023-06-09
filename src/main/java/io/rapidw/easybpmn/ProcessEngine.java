@@ -3,8 +3,9 @@ package io.rapidw.easybpmn;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.rapidw.easybpmn.engine.repository.*;
 import io.rapidw.easybpmn.engine.runtime.*;
-import io.rapidw.easybpmn.engine.runtime.operation.Operation;
+import io.rapidw.easybpmn.engine.runtime.operation.AbstractOperation;
 import io.rapidw.easybpmn.task.TaskQuery;
+import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.Persistence;
 import lombok.Getter;
@@ -19,10 +20,11 @@ public class ProcessEngine {
     @Getter
     private final EntityManagerFactory entityManagerFactory;
     @Getter
-    private ObjectMapper objectMapper;
-    private ProcessRegistry processRegistry;
+    private final ObjectMapper objectMapper;
+    private final ProcessRegistry processRegistry;
 
-    private OperationExecutor operationExecutor;
+    private final OperationExecutor operationExecutor;
+
 
     @Getter
     private final RuntimeService runtimeService;
@@ -46,14 +48,14 @@ public class ProcessEngine {
         this.operationExecutor = new OperationExecutor(this);
 
         this.runtimeService = new RuntimeService(entityManagerFactory);
-        this.taskRepository = new TaskRepository(entityManagerFactory);
+        this.taskRepository = new TaskRepository();
         this.historyService = new HistoryService();
-        this.processInstanceRepository = new ProcessInstanceRepository(entityManagerFactory);
+        this.processInstanceRepository = new ProcessInstanceRepository();
         this.processDefinitionService = new ProcessDefinitionService();
-        this.executionRepository = new ExecutionRepository(entityManagerFactory);
+        this.executionRepository = new ExecutionRepository();
     }
 
-    public void addOperation(Operation operation) {
+    public void addOperation(AbstractOperation operation) {
         this.operationExecutor.addOperation(operation);
     }
 
@@ -66,15 +68,17 @@ public class ProcessEngine {
         val definition = ProcessDefinition.builder().processEngine(this).deployment(deployments.get(0)).build();
         processDefinitionService.put(id, definition);
         val processInstance = new ProcessInstance(this, definition, variable);
-        this.getProcessInstanceRepository().persistAndGetId(processInstance);
+        try (EntityManager entityManager = entityManagerFactory.createEntityManager()) {
+            this.getProcessInstanceRepository().persistAndGetId(entityManager, processInstance);
+        }
         processInstance.start();
         return processInstance;
     }
 
 
     public List<TaskInstance> queryTask(TaskQuery query) {
-        return taskRepository.queryTask(query);
+        try (EntityManager entityManager = entityManagerFactory.createEntityManager()) {
+            return taskRepository.queryTask(entityManager, query);
+        }
     }
-
-
 }

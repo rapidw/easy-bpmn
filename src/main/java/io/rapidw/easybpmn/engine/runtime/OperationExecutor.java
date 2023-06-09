@@ -1,9 +1,8 @@
 package io.rapidw.easybpmn.engine.runtime;
 
 import io.rapidw.easybpmn.ProcessEngine;
-import io.rapidw.easybpmn.engine.runtime.operation.Operation;
+import io.rapidw.easybpmn.engine.runtime.operation.AbstractOperation;
 import jakarta.persistence.EntityManager;
-import jakarta.persistence.EntityManagerFactory;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 
@@ -14,25 +13,20 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class OperationExecutor {
     private final ProcessEngine processEngine;
     private final ExecutorService executorService;
+    private final ThreadLocal<EntityManager> entityManagerThreadLocal;
 
     public OperationExecutor(ProcessEngine processEngine) {
         this.processEngine = processEngine;
-        val myThreadFactory = new MyThreadFactory(processEngine.getEntityManagerFactory());
+        this.entityManagerThreadLocal = ThreadLocal.withInitial(() -> processEngine.getEntityManagerFactory().createEntityManager());
+        val myThreadFactory = new MyThreadFactory();
         this.executorService = new ThreadPoolExecutor(1, 1, 0, TimeUnit.SECONDS, new LinkedBlockingQueue<>(), myThreadFactory) {
-            @Override
-            protected void beforeExecute(Thread t, Runnable r) {
-                super.beforeExecute(t, r);
-                log.debug("EXECUTING OPERATION {}", r.getClass().getSimpleName());
-                EntityManager entityManager = processEngine.getEntityManagerFactory().createEntityManager();
-                ThreadLocal<EntityManager> entityManagerThreadLocal = new ThreadLocal<>();
-                entityManagerThreadLocal.set(entityManager);
-            }
 
             @Override
             protected void afterExecute(Runnable r, Throwable t) {
-                super.afterExecute(r, t);
+                val entityManager = entityManagerThreadLocal.get();
+                entityManager.close();
+                entityManagerThreadLocal.remove();
 
-                log.debug("FINISHED EXECUTING OPERATION {}", r.getClass().getSimpleName());
                 if (t != null) {
                     log.error("uncaught exception in thread {}", Thread.currentThread().getName(), t);
                 }
@@ -45,25 +39,23 @@ public class OperationExecutor {
                     } catch (InterruptedException | ExecutionException e) {
                         throw new RuntimeException(e);
                     }
-
                 }
             }
         };
     }
 
-    public void addOperation(Operation operation) {
+    public void addOperation(AbstractOperation operation) {
         this.executorService.submit(() -> {
             log.debug("EXECUTING OPERATION {}", operation.getClass().getSimpleName());
-            operation.execute(this.processEngine);
+            operation.execute(this.processEngine, this.entityManagerThreadLocal);
         });
     }
 
     private static class MyThreadFactory implements ThreadFactory {
         private final AtomicInteger threadNumber = new AtomicInteger(1);
-        private final EntityManagerFactory entityManagerFactory;
 
-        public MyThreadFactory(EntityManagerFactory entityManagerFactory) {
-            this.entityManagerFactory = entityManagerFactory;
+
+        public MyThreadFactory() {
         }
 
         @Override

@@ -5,6 +5,7 @@ import io.rapidw.easybpmn.engine.runtime.DeploymentQuery;
 import io.rapidw.easybpmn.engine.serialization.Bpmn;
 import io.rapidw.easybpmn.registry.Deployment;
 import io.rapidw.easybpmn.registry.DeploymentService;
+import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.Persistence;
 import lombok.Getter;
@@ -27,7 +28,7 @@ public class ProcessRegistry {
         this.config = config;
         this.entityManagerFactory = Persistence.createEntityManagerFactory("easy-bpmn");
         this.objectMapper = new ObjectMapper();
-        this.deploymentService = new DeploymentService(entityManagerFactory);
+        this.deploymentService = new DeploymentService();
     }
 
     @SneakyThrows
@@ -36,11 +37,16 @@ public class ProcessRegistry {
         if (!validate(bpmn)) {
             throw new ProcessEngineException("invalid bpmn model");
         }
-        return deploymentService.deploy(Deployment.builder().name("test").model(model).build());
+        try (EntityManager entityManager = entityManagerFactory.createEntityManager()) {
+            return deploymentService.deploy(entityManager,
+                Deployment.builder().name("test").model(model).build());
+        }
     }
 
     public List<Deployment> query(DeploymentQuery query) {
-        return deploymentService.queryProcessDefinition(query);
+        try (EntityManager entityManager = entityManagerFactory.createEntityManager()) {
+            return deploymentService.queryProcessDefinition(entityManager, query);
+        }
     }
 
     private boolean validate(Bpmn bpmn) {
