@@ -1,8 +1,12 @@
 package io.rapidw.easybpmn
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import io.rapidw.easybpmn.engine.ProcessEngine
+import io.rapidw.easybpmn.engine.ProcessEngineConfig
 import io.rapidw.easybpmn.engine.repository.TaskRepository
 import io.rapidw.easybpmn.engine.serialization.*
+import io.rapidw.easybpmn.registry.ProcessRegistry
+import io.rapidw.easybpmn.registry.ProcessRegistryConfig
 import io.rapidw.easybpmn.task.TaskQuery
 import spock.lang.Specification
 
@@ -58,7 +62,7 @@ class ProcessEngineSpec extends Specification {
 
 //        def another_process = objectMapper.readValue(str, Bpmn.class)
 
-        def registryConfig = new ProcessRegistryConfig()
+        def registryConfig = ProcessRegistryConfig.builder().build()
         def registry = new ProcessRegistry(registryConfig)
 
         def engineConfig = ProcessEngineConfig.builder().build()

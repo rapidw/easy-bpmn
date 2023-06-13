@@ -1,4 +1,4 @@
-package io.rapidw.easybpmn;
+package io.rapidw.easybpmn.registry;
 
 import lombok.Builder;
 

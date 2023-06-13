@@ -6,9 +6,12 @@ import io.rapidw.easybpmn.engine.runtime.QExecution;
 import jakarta.persistence.EntityManager;
 
 public class ExecutionRepository extends AbstractRepository<Execution> {
+    public ExecutionRepository(ThreadLocal<EntityManager> entityManagerThreadLocal) {
+        super(entityManagerThreadLocal);
+    }
 
-    public Execution get(EntityManager entityManager, Integer processInstanceId, Integer executionId) {
-        JPAQuery<Execution> executionJPAQuery = new JPAQuery<>(entityManager);
+    public Execution get(Integer processInstanceId, Integer executionId) {
+        JPAQuery<Execution> executionJPAQuery = new JPAQuery<>(getEntityManager());
         QExecution qExecution = QExecution.execution;
         return executionJPAQuery.from(qExecution).where(qExecution.processInstance.id.eq(processInstanceId).and(qExecution.id.eq(executionId))).fetchOne();
     }

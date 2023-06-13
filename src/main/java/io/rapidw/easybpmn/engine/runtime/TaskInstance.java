@@ -15,8 +15,8 @@ import lombok.extern.slf4j.Slf4j;
 public class TaskInstance implements HasId {
 
     @Builder
-    public TaskInstance(ProcessInstance processInstance, Execution execution, UserTask userTask, String assignee, String name, Variable variable) {
-        this.processInstance = processInstance;
+    public TaskInstance(Execution execution, UserTask userTask, String assignee, String name, Variable variable) {
+        this.processInstance = execution.getProcessInstance();
         this.execution = execution;
         this.assignee = assignee;
         this.name = name;

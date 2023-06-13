@@ -1,6 +1,5 @@
-package io.rapidw.easybpmn.engine.runtime;
+package io.rapidw.easybpmn.engine;
 
-import io.rapidw.easybpmn.ProcessEngine;
 import io.rapidw.easybpmn.engine.runtime.operation.AbstractOperation;
 import jakarta.persistence.EntityManager;
 import lombok.extern.slf4j.Slf4j;
@@ -13,32 +12,29 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class OperationExecutor {
     private final ProcessEngine processEngine;
     private final ExecutorService executorService;
-    private final ThreadLocal<EntityManager> entityManagerThreadLocal;
 
     public OperationExecutor(ProcessEngine processEngine) {
         this.processEngine = processEngine;
-        this.entityManagerThreadLocal = ThreadLocal.withInitial(() -> processEngine.getEntityManagerFactory().createEntityManager());
-        val myThreadFactory = new MyThreadFactory();
+        val entityManagerThreadLocal = processEngine.getEntityManagerThreadLocal();
+        val myThreadFactory = new MyThreadFactory(entityManagerThreadLocal);
         this.executorService = new ThreadPoolExecutor(1, 1, 0, TimeUnit.SECONDS, new LinkedBlockingQueue<>(), myThreadFactory) {
 
             @Override
             protected void afterExecute(Runnable r, Throwable t) {
-                val entityManager = entityManagerThreadLocal.get();
-                entityManager.close();
-                entityManagerThreadLocal.remove();
-
+                super.afterExecute(r, t);
+                if (t == null && r instanceof Future<?> && ((Future<?>) r).isDone()) {
+                    try {
+                        Object result = ((Future<?>) r).get();
+                    } catch (CancellationException ce) {
+                        t = ce;
+                    } catch (ExecutionException ee) {
+                        t = ee.getCause();
+                    } catch (InterruptedException ie) {
+                        Thread.currentThread().interrupt();
+                    }
+                }
                 if (t != null) {
                     log.error("uncaught exception in thread {}", Thread.currentThread().getName(), t);
-                }
-                if (r instanceof FutureTask<?> futureTask) {
-                    try {
-                        val get = futureTask.get();
-                        if (get instanceof Throwable throwable) {
-                            log.error("uncaught exception in thread {}", Thread.currentThread().getName(), throwable);
-                        }
-                    } catch (InterruptedException | ExecutionException e) {
-                        throw new RuntimeException(e);
-                    }
                 }
             }
         };
@@ -47,25 +43,29 @@ public class OperationExecutor {
     public void addOperation(AbstractOperation operation) {
         this.executorService.submit(() -> {
             log.debug("EXECUTING OPERATION {}", operation.getClass().getSimpleName());
-            operation.execute(this.processEngine, this.entityManagerThreadLocal);
+            operation.execute(this.processEngine);
         });
     }
 
     private static class MyThreadFactory implements ThreadFactory {
+        private final ThreadLocal<EntityManager> entityManagerThreadLocal;
         private final AtomicInteger threadNumber = new AtomicInteger(1);
 
 
-        public MyThreadFactory() {
+        public MyThreadFactory(ThreadLocal<EntityManager> entityManagerThreadLocal) {
+            this.entityManagerThreadLocal = entityManagerThreadLocal;
         }
 
         @Override
         public Thread newThread(Runnable runnable) {
             val thread = new Thread(() -> {
-
+//
                 runnable.run();
+                entityManagerThreadLocal.get().close();
+                entityManagerThreadLocal.remove();
             });
             thread.setName("operation-executor-" + threadNumber.getAndIncrement());
-            thread.setUncaughtExceptionHandler((t, e) -> log.error("uncaught exception in thread {}", t.getName(), e));
+//            thread.setUncaughtExceptionHandler((t, e) -> log.error("uncaught exception in thread {}", t.getName(), e));
             return thread;
         }
     }

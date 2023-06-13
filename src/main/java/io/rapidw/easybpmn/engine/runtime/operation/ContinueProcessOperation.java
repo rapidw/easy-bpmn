@@ -19,7 +19,7 @@ public class ContinueProcessOperation extends AbstractOperation {
         } else if (currentFlowElement instanceof SequenceFlow sequenceFlow) {
             handleSequenceFlow(sequenceFlow);
         } else {
-            throw new ProcessEngineException("invalid flow element type:" + currentFlowElement.getClass().getName());
+            throw new ProcessEngineException("invalid flow element " + currentFlowElement.getId() + " of type " + currentFlowElement.getClass().getSimpleName());
         }
     }
 
@@ -27,26 +27,33 @@ public class ContinueProcessOperation extends AbstractOperation {
         if (flowNode instanceof Event event) {
             if (event instanceof StartEvent startEvent) {
                 planTakeOutgoingSequenceFlowsOperation(this.execution);
+            } else {
+                notImplemented();
             }
         } else if (flowNode instanceof Activity activity) {
             handleActivity(activity);
+        } else {
+            notImplemented();
         }
+    }
+
+    private void notImplemented() {
+        throw new ProcessEngineException("invalid flow node " + currentFlowElement.getId() + " of type" + currentFlowElement.getClass().getSimpleName());
     }
 
     private void handleSequenceFlow(SequenceFlow sequenceFlow) {
         this.execution.setCurrentFlowElementId(sequenceFlow.getTargetRef().getId());
-        this.processEngine.getExecutionRepository().merge(this.entityManager, this.execution);
+        this.processEngine.getExecutionRepository().merge(this.execution);
         planContinueProcessOperation(this.execution);
     }
 
     private void handleActivity(Activity activity) {
         if (activity instanceof UserTask userTask) {
             val taskInstance = TaskInstance.builder()
-                .processInstance(processInstance)
                 .execution(execution)
                 .userTask(userTask)
                 .build();
-            this.processEngine.getTaskRepository().persistAndGetId(this.entityManager, taskInstance);
+            this.processEngine.getTaskRepository().persistAndGetId(taskInstance);
         }
     }
 }

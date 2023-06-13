@@ -1,15 +1,12 @@
 package io.rapidw.easybpmn.engine.runtime;
 
-import io.rapidw.easybpmn.ProcessEngine;
+import io.rapidw.easybpmn.engine.ProcessEngine;
 import io.rapidw.easybpmn.ProcessEngineException;
 import io.rapidw.easybpmn.engine.runtime.operation.ContinueProcessOperation;
 import io.rapidw.easybpmn.task.TaskQuery;
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.SneakyThrows;
+import lombok.*;
 import lombok.extern.slf4j.Slf4j;
-import lombok.val;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -21,6 +18,7 @@ import java.util.List;
 public class ProcessInstance implements HasId {
 
     @Transient
+    @Setter
     @Getter
     private ProcessEngine processEngine;
 
@@ -30,8 +28,9 @@ public class ProcessInstance implements HasId {
     private Integer id;
 
     @Getter
-    @Transient
-    private ProcessDefinition processDefinition;
+    @Setter
+    private Integer deploymentId;
+
     private boolean finished;
 
     //??
@@ -51,7 +50,7 @@ public class ProcessInstance implements HasId {
         this.processEngine = processEngine;
         this.executions = new LinkedList<>();
 
-        this.processDefinition = processDefinition;
+        this.deploymentId = processDefinition.getId();
         val execution = Execution.builder()
             .processInstance(this)
             .initialFlowElement(processDefinition.getProcess().getInitialFlowElement())
@@ -65,6 +64,10 @@ public class ProcessInstance implements HasId {
         this.variable.setJson(processEngine.getObjectMapper().writeValueAsString(variableObj));
     }
 
+    public ProcessDefinition getProcessDefinition() {
+        return this.processEngine.getProcessDefinitionService().get(id);
+    }
+
     public List<TaskInstance> queryTask(TaskQuery taskQuery) {
         return processEngine.queryTask(taskQuery.setProcessInstanceId(this.id));
     }
@@ -73,7 +76,7 @@ public class ProcessInstance implements HasId {
         log.info("start process instance");
 
         processEngine.addOperation(ContinueProcessOperation.builder()
-            .processDefinitionId(this.processDefinition.getId())
+            .processDefinitionId(this.deploymentId)
             .processInstanceId(this.getId())
             .executionId(this.executions.get(0).getId())
             .build()

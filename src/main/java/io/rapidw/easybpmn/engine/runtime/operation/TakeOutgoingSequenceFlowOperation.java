@@ -30,7 +30,7 @@ public class TakeOutgoingSequenceFlowOperation extends AbstractOperation {
         //reuse first execution
         execution.setCurrentFlowElementId(outgoingSequenceFlows.get(0).getId());
         execution.setActive(false);
-        this.processEngine.getExecutionRepository().merge(this.entityManager, execution);
+        this.processEngine.getExecutionRepository().merge(execution);
 
         outgoingExecutions.add(execution);
 
@@ -39,7 +39,7 @@ public class TakeOutgoingSequenceFlowOperation extends AbstractOperation {
                 val sf = outgoingSequenceFlows.get(i);
                 val parent = execution.getParent() != null ? execution.getParent() : execution;
 
-                val child = Execution.builder().processInstance(processInstance)
+                val child = Execution.builder()
                     .parent(parent)
                     .initialFlowElement(sf)
                     .active(false)

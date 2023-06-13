@@ -10,6 +10,9 @@ import lombok.val;
 import java.util.List;
 
 public class TaskRepository extends AbstractRepository<TaskInstance> {
+    public TaskRepository(ThreadLocal<EntityManager> entityManagerThreadLocal) {
+        super(entityManagerThreadLocal);
+    }
 
     public List<TaskInstance> queryTask(EntityManager entityManager, TaskQuery taskQuery) {
         JPAQuery<TaskInstance> executionJPAQuery = new JPAQuery<>(entityManager);

@@ -3,12 +3,22 @@ package io.rapidw.easybpmn.engine.repository;
 import io.rapidw.easybpmn.engine.runtime.HasId;
 import jakarta.persistence.EntityManager;
 import lombok.extern.slf4j.Slf4j;
+import lombok.val;
 
 @Slf4j
 public class AbstractRepository<T extends HasId> {
+    protected ThreadLocal<EntityManager> entityManagerThreadLocal;
+    public AbstractRepository(ThreadLocal<EntityManager> entityManagerThreadLocal) {
+        this.entityManagerThreadLocal = entityManagerThreadLocal;
+    }
 
-    public Integer persistAndGetId(EntityManager entityManager, T object) {
+    protected EntityManager getEntityManager() {
+        return entityManagerThreadLocal.get();
+    }
+
+    public Integer persistAndGetId(T object) {
         log.debug("persistAndGetId {}", object.getClass().getSimpleName());
+        val entityManager = getEntityManager();
         entityManager.getTransaction().begin();
         entityManager.persist(object);
         entityManager.flush();
@@ -16,8 +26,9 @@ public class AbstractRepository<T extends HasId> {
         return object.getId();
     }
 
-    public void merge(EntityManager entityManager, T object) {
+    public void merge(T object) {
         log.debug("merge {}", object.getClass().getSimpleName());
+        val entityManager = getEntityManager();
         entityManager.getTransaction().begin();
         entityManager.merge(object);
         entityManager.getTransaction().commit();
