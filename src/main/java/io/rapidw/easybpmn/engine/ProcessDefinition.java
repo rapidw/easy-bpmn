@@ -1,7 +1,9 @@
-package io.rapidw.easybpmn.engine.runtime;
+package io.rapidw.easybpmn.engine;
 
-import io.rapidw.easybpmn.engine.ProcessEngine;
 import io.rapidw.easybpmn.ProcessEngineException;
+import io.rapidw.easybpmn.engine.behavior.NoneEndEventBehavior;
+import io.rapidw.easybpmn.engine.behavior.NoneStartEventBehavior;
+import io.rapidw.easybpmn.engine.behavior.TaskActivityBehavior;
 import io.rapidw.easybpmn.engine.model.FlowElement;
 import io.rapidw.easybpmn.engine.model.FlowNode;
 import io.rapidw.easybpmn.engine.model.Process;
@@ -43,16 +45,22 @@ public class ProcessDefinition {
         process.getFlowElements().forEach(fe -> {
             FlowElement model = null;
             if (fe instanceof StartEvent startEvent) {
-                model = new io.rapidw.easybpmn.engine.model.StartEvent();
-                model.setId(startEvent.getId());
-                processModel.setInitialFlowElement(model);
+                val startEventModel = new io.rapidw.easybpmn.engine.model.StartEvent();
+                startEventModel.setId(startEvent.getId());
+                startEventModel.setBehavior(NoneStartEventBehavior.INSTANCE);
+                processModel.setInitialFlowElement(startEventModel);
+                model = startEventModel;
             } else if (fe instanceof UserTask userTask) {
-                model = new io.rapidw.easybpmn.engine.model.UserTask();
-                model.setId(userTask.getId());
-                model.setName(userTask.getName());
+                val userTaskModel = new io.rapidw.easybpmn.engine.model.UserTask();
+                userTaskModel.setId(userTask.getId());
+                userTaskModel.setName(userTask.getName());
+                userTaskModel.setBehavior(TaskActivityBehavior.INSTANCE);
+                model = userTaskModel;
             } else if (fe instanceof EndEvent endEvent) {
-                 model = new io.rapidw.easybpmn.engine.model.EndEvent();
-                 model.setId(endEvent.getId());
+                 val endEventModel = new io.rapidw.easybpmn.engine.model.EndEvent();
+                 endEventModel.setId(endEvent.getId());
+                 endEventModel.setBehavior(NoneEndEventBehavior.INSTANCE);
+                 model= endEventModel;
             }
             if (model == null) {
                 throw new ProcessEngineException("null model");
@@ -80,4 +88,6 @@ public class ProcessDefinition {
         });
         this.process = processModel;
     }
+
+
 }

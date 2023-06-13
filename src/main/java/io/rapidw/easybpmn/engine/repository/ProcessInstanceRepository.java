@@ -1,8 +1,8 @@
 package io.rapidw.easybpmn.engine.repository;
 
 import com.querydsl.jpa.impl.JPAQuery;
-import io.rapidw.easybpmn.engine.runtime.ProcessInstance;
-import io.rapidw.easybpmn.engine.runtime.QProcessInstance;
+import io.rapidw.easybpmn.engine.ProcessInstance;
+import io.rapidw.easybpmn.engine.QProcessInstance;
 import jakarta.persistence.EntityManager;
 import lombok.val;
 

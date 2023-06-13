@@ -1,4 +1,4 @@
-package io.rapidw.easybpmn.engine.runtime;
+package io.rapidw.easybpmn.engine;
 
 import io.rapidw.easybpmn.engine.model.FlowElement;
 import io.rapidw.easybpmn.engine.repository.TaskRepository;

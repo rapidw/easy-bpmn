@@ -1,6 +1,6 @@
 package io.rapidw.easybpmn.engine;
 
-import io.rapidw.easybpmn.engine.runtime.operation.AbstractOperation;
+import io.rapidw.easybpmn.engine.operation.AbstractOperation;
 import jakarta.persistence.EntityManager;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
@@ -65,7 +65,6 @@ public class OperationExecutor {
                 entityManagerThreadLocal.remove();
             });
             thread.setName("operation-executor-" + threadNumber.getAndIncrement());
-//            thread.setUncaughtExceptionHandler((t, e) -> log.error("uncaught exception in thread {}", t.getName(), e));
             return thread;
         }
     }

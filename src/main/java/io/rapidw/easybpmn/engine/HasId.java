@@ -1,4 +1,4 @@
-package io.rapidw.easybpmn.engine.runtime;
+package io.rapidw.easybpmn.engine;
 
 public interface HasId {
     Integer getId();

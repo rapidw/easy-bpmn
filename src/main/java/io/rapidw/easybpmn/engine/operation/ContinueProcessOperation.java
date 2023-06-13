@@ -1,9 +1,9 @@
-package io.rapidw.easybpmn.engine.runtime.operation;
+package io.rapidw.easybpmn.engine.operation;
 
 
 import io.rapidw.easybpmn.ProcessEngineException;
 import io.rapidw.easybpmn.engine.model.*;
-import io.rapidw.easybpmn.engine.runtime.TaskInstance;
+import io.rapidw.easybpmn.engine.TaskInstance;
 import lombok.experimental.SuperBuilder;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
@@ -25,11 +25,7 @@ public class ContinueProcessOperation extends AbstractOperation {
 
     private void handleFlowNode(FlowNode flowNode) {
         if (flowNode instanceof Event event) {
-            if (event instanceof StartEvent startEvent) {
-                planTakeOutgoingSequenceFlowsOperation(this.execution);
-            } else {
-                notImplemented();
-            }
+            handleEvent(event);
         } else if (flowNode instanceof Activity activity) {
             handleActivity(activity);
         } else {
@@ -39,6 +35,16 @@ public class ContinueProcessOperation extends AbstractOperation {
 
     private void notImplemented() {
         throw new ProcessEngineException("invalid flow node " + currentFlowElement.getId() + " of type" + currentFlowElement.getClass().getSimpleName());
+    }
+
+    public void handleEvent(Event event) {
+        if (event instanceof StartEvent startEvent) {
+            startEvent.getBehavior().execute(this.execution);
+        } else if (event instanceof EndEvent endEvent) {
+            endEvent.getBehavior().execute(this.execution);
+        } else {
+            notImplemented();
+        }
     }
 
     private void handleSequenceFlow(SequenceFlow sequenceFlow) {

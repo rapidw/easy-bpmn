@@ -2,7 +2,6 @@ package io.rapidw.easybpmn.registry;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.rapidw.easybpmn.ProcessEngineException;
-import io.rapidw.easybpmn.engine.runtime.DeploymentQuery;
 import io.rapidw.easybpmn.engine.serialization.Bpmn;
 import jakarta.persistence.EntityManager;
 import lombok.Getter;

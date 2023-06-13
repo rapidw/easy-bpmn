@@ -1,6 +1,6 @@
 package io.rapidw.easybpmn.registry;
 
-import io.rapidw.easybpmn.engine.runtime.HasId;
+import io.rapidw.easybpmn.engine.HasId;
 import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.Data;

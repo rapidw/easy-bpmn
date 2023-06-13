@@ -1,16 +1,14 @@
-package io.rapidw.easybpmn.engine.runtime.operation;
+package io.rapidw.easybpmn.engine.operation;
 
 import io.rapidw.easybpmn.engine.ProcessEngine;
 import io.rapidw.easybpmn.engine.model.FlowElement;
-import io.rapidw.easybpmn.engine.runtime.Execution;
-import io.rapidw.easybpmn.engine.runtime.ProcessDefinition;
+import io.rapidw.easybpmn.engine.Execution;
+import io.rapidw.easybpmn.engine.ProcessDefinition;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public abstract class AbstractOperation {
 
-    private final Integer processDefinitionId;
-    private final Integer processInstanceId;
     private final Integer executionId;
     protected ProcessEngine processEngine;
 
@@ -19,15 +17,13 @@ public abstract class AbstractOperation {
     protected FlowElement currentFlowElement;
 
     protected AbstractOperation(AbstractOperationBuilder<?, ?> b) {
-        this.processDefinitionId = b.processDefinitionId;
-        this.processInstanceId = b.processInstanceId;
         this.executionId = b.executionId;
     }
 
     public void execute(ProcessEngine processEngine) {
         this.processEngine = processEngine;
-        this.execution = this.processEngine.getExecutionRepository().get(this.processInstanceId, this.executionId);
-        this.processDefinition = processEngine.getProcessDefinitionService().get(processDefinitionId);
+        this.execution = this.processEngine.getExecutionRepository().get(this.executionId);
+        this.processDefinition = processEngine.getProcessDefinitionService().get(execution.getProcessInstance().getDeploymentId());
         this.currentFlowElement = this.processDefinition.getProcess().getFlowElementMap().get(this.execution.getCurrentFlowElementId());
         log.debug("execute operation: {}, current flow element {}", this.getClass().getSimpleName(), this.execution.getCurrentFlowElementId());
         execute();
@@ -35,24 +31,18 @@ public abstract class AbstractOperation {
 
     public abstract void execute();
 
-    protected AbstractOperation(Integer processDefinitionId, Integer processInstanceId, Integer executionId) {
-        this.processDefinitionId = processDefinitionId;
-        this.processInstanceId = processInstanceId;
+    protected AbstractOperation(Integer executionId) {
         this.executionId = executionId;
     }
 
     protected void planTakeOutgoingSequenceFlowsOperation(Execution execution) {
         planOperation(TakeOutgoingSequenceFlowOperation.builder()
-            .processDefinitionId(processDefinitionId)
-            .processInstanceId(processInstanceId)
             .executionId(execution.getId())
             .build());
     }
 
     protected void planContinueProcessOperation(Execution execution) {
         planOperation(ContinueProcessOperation.builder()
-            .processDefinitionId(processDefinitionId)
-            .processInstanceId(processInstanceId)
             .executionId(execution.getId())
             .build());
     }

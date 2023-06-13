@@ -1,7 +1,7 @@
-package io.rapidw.easybpmn.engine.runtime;
+package io.rapidw.easybpmn.engine;
 
 import io.rapidw.easybpmn.engine.model.UserTask;
-import io.rapidw.easybpmn.engine.runtime.operation.TakeOutgoingSequenceFlowOperation;
+import io.rapidw.easybpmn.engine.operation.TakeOutgoingSequenceFlowOperation;
 import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.Getter;

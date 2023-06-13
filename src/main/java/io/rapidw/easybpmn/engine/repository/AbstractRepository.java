@@ -1,6 +1,6 @@
 package io.rapidw.easybpmn.engine.repository;
 
-import io.rapidw.easybpmn.engine.runtime.HasId;
+import io.rapidw.easybpmn.engine.HasId;
 import jakarta.persistence.EntityManager;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;

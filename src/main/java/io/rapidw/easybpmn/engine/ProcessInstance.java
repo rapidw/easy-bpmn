@@ -1,8 +1,7 @@
-package io.rapidw.easybpmn.engine.runtime;
+package io.rapidw.easybpmn.engine;
 
-import io.rapidw.easybpmn.engine.ProcessEngine;
 import io.rapidw.easybpmn.ProcessEngineException;
-import io.rapidw.easybpmn.engine.runtime.operation.ContinueProcessOperation;
+import io.rapidw.easybpmn.engine.operation.ContinueProcessOperation;
 import io.rapidw.easybpmn.task.TaskQuery;
 import jakarta.persistence.*;
 import lombok.*;
@@ -18,7 +17,7 @@ import java.util.List;
 public class ProcessInstance implements HasId {
 
     @Transient
-    @Setter
+    @Setter(AccessLevel.PACKAGE)
     @Getter
     private ProcessEngine processEngine;
 

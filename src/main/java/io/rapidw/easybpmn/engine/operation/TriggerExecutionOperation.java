@@ -1,4 +1,4 @@
-package io.rapidw.easybpmn.engine.runtime.operation;
+package io.rapidw.easybpmn.engine.operation;
 
 import lombok.experimental.SuperBuilder;
 
