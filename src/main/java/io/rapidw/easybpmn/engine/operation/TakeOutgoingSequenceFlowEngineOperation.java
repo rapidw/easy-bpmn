@@ -11,7 +11,7 @@ import java.util.ArrayList;
 
 @SuperBuilder
 @Slf4j
-public class TakeOutgoingSequenceFlowOperation extends AbstractOperation {
+public class TakeOutgoingSequenceFlowEngineOperation extends AbstractEngineOperation {
 
     @Override
     public void execute() {

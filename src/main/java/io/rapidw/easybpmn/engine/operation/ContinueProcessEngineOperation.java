@@ -10,7 +10,7 @@ import lombok.val;
 
 @SuperBuilder
 @Slf4j
-public class ContinueProcessOperation extends AbstractOperation {
+public class ContinueProcessEngineOperation extends AbstractEngineOperation {
 
     @Override
     public void execute() {
@@ -28,6 +28,8 @@ public class ContinueProcessOperation extends AbstractOperation {
             handleEvent(event);
         } else if (flowNode instanceof Activity activity) {
             handleActivity(activity);
+        } else if (flowNode instanceof Gateway gateway) {
+            handleGateway(gateway);
         } else {
             notImplemented();
         }
@@ -60,6 +62,18 @@ public class ContinueProcessOperation extends AbstractOperation {
                 .userTask(userTask)
                 .build();
             this.processEngine.getTaskRepository().persistAndGetId(taskInstance);
+        }
+    }
+
+    private void handleGateway(Gateway gateway) {
+        if (gateway instanceof ParallelGateway parallelGateway) {
+            parallelGateway.getBehavior().execute(this.execution);
+        } else if (gateway instanceof ExclusiveGateway exclusiveGateway) {
+            exclusiveGateway.getBehavior().execute(this.execution);
+        } else if (gateway instanceof InclusiveGateway inclusiveGateway) {
+            inclusiveGateway.getBehavior().execute(this.execution);
+        } else {
+            notImplemented();
         }
     }
 }

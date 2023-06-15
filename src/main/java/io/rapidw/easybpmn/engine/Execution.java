@@ -1,6 +1,7 @@
 package io.rapidw.easybpmn.engine;
 
 import io.rapidw.easybpmn.engine.model.FlowElement;
+import io.rapidw.easybpmn.engine.repository.ExecutionRepository;
 import io.rapidw.easybpmn.engine.repository.TaskRepository;
 import io.rapidw.easybpmn.task.TaskQuery;
 import jakarta.persistence.*;
@@ -31,6 +32,9 @@ public class Execution implements HasId {
     @Getter
     private TaskRepository taskRepository;
 
+    @Transient
+    private ExecutionRepository executionRepository;
+
     // flowElement id persist??
     @Getter
     @Setter
@@ -43,6 +47,7 @@ public class Execution implements HasId {
     @OneToMany(mappedBy = "parent")
     private List<Execution> children;
 
+    // todo: use it
     @Getter
     @Setter
     private boolean active;
@@ -50,6 +55,7 @@ public class Execution implements HasId {
     @Builder
     public Execution(ProcessInstance processInstance, FlowElement initialFlowElement, Execution parent, boolean active) {
         this.processInstance = processInstance;
+        this.executionRepository = processInstance.getProcessEngine().getExecutionRepository();
         this.taskRepository = processInstance.getProcessEngine().getTaskRepository();
         this.currentFlowElementId = initialFlowElement.getId();
         this.parent = parent;
@@ -65,4 +71,7 @@ public class Execution implements HasId {
         this.children.add(execution);
     }
 
+    public void merge() {
+        this.executionRepository.merge(this);
+    }
 }

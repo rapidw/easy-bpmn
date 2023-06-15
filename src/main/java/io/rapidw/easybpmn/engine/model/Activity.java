@@ -1,7 +1,12 @@
 package io.rapidw.easybpmn.engine.model;
 
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+
 import java.util.List;
 
+@Data
+@EqualsAndHashCode(callSuper = true)
 public class Activity extends FlowNode {
 
     private Boolean isForCompensation;

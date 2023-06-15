@@ -7,4 +7,7 @@ import lombok.EqualsAndHashCode;
 @EqualsAndHashCode(callSuper = true)
 public class StartEvent extends Event {
 
+    public class NoneStartEventBehavior implements Behavior {
+//        public static NoneStartEventBehavior INSTANCE = new NoneStartEventBehavior();
+    }
 }

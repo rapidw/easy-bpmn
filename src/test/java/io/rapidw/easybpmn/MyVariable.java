@@ -4,7 +4,6 @@ import lombok.Data;
 
 @Data
 public class MyVariable {
-
-    private String str;
+    private Integer x;
 
 }

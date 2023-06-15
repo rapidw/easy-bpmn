@@ -1,6 +1,5 @@
 package io.rapidw.easybpmn.engine.model;
 
-import io.rapidw.easybpmn.engine.behavior.Behavior;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 

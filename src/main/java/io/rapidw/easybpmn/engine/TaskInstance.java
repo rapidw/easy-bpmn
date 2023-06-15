@@ -1,11 +1,10 @@
 package io.rapidw.easybpmn.engine;
 
+import io.rapidw.easybpmn.ProcessEngineException;
 import io.rapidw.easybpmn.engine.model.UserTask;
-import io.rapidw.easybpmn.engine.operation.TakeOutgoingSequenceFlowOperation;
+import io.rapidw.easybpmn.engine.operation.TakeOutgoingSequenceFlowEngineOperation;
 import jakarta.persistence.*;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 
 @Entity
@@ -43,11 +42,19 @@ public class TaskInstance implements HasId {
     @Embedded
     private Variable variable;
 
+    @SneakyThrows
+    public <T> T getVariable(Class<T> clazz) {
+        val className = this.processInstance.getVariable().getClazz();
+        if (className.equals(clazz.getName())) {
+            return this.processInstance.getProcessEngine().getObjectMapper().readValue(this.variable.getJson(), clazz);
+        } else {
+            throw new ProcessEngineException("variable type mismatch");
+        }
+    }
+
     public void complete(Object variable) {
-        this.processInstance.getProcessEngine().addOperation(TakeOutgoingSequenceFlowOperation.builder()
-            .processInstanceId(processInstance.getId())
+        this.processInstance.getProcessEngine().addOperation(TakeOutgoingSequenceFlowEngineOperation.builder()
             .executionId(execution.getId())
-            .processDefinitionId(processInstance.getProcessDefinition().getId())
             .build());
         log.debug("completing task instance: {}", this.id);
     }

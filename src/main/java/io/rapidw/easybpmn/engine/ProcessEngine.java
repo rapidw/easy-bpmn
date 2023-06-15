@@ -2,14 +2,16 @@ package io.rapidw.easybpmn.engine;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.rapidw.easybpmn.ProcessEngineException;
+import io.rapidw.easybpmn.engine.operation.AbstractEngineOperation;
 import io.rapidw.easybpmn.engine.repository.ExecutionRepository;
 import io.rapidw.easybpmn.engine.repository.ProcessDefinitionService;
 import io.rapidw.easybpmn.engine.repository.ProcessInstanceRepository;
 import io.rapidw.easybpmn.engine.repository.TaskRepository;
 import io.rapidw.easybpmn.registry.DeploymentQuery;
-import io.rapidw.easybpmn.engine.operation.AbstractOperation;
 import io.rapidw.easybpmn.registry.ProcessRegistry;
 import io.rapidw.easybpmn.task.TaskQuery;
+import jakarta.el.ExpressionFactory;
+import jakarta.persistence.Entity;
 import jakarta.persistence.EntityManager;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -19,6 +21,7 @@ import org.hibernate.SessionFactory;
 import org.hibernate.boot.MetadataSources;
 import org.hibernate.boot.registry.StandardServiceRegistry;
 import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
+import org.reflections.Reflections;
 
 import java.util.List;
 
@@ -33,8 +36,9 @@ public class ProcessEngine {
     private final ProcessRegistry processRegistry;
     @Getter(AccessLevel.PACKAGE)
     private final ThreadLocal<EntityManager> entityManagerThreadLocal;
-
     private final OperationExecutor operationExecutor;
+    @Getter
+    private final ExpressionFactory expressionFactory;
 
 
     //    @Getter
@@ -51,10 +55,14 @@ public class ProcessEngine {
 
 
     public ProcessEngine(ProcessRegistry processRegistry, ProcessEngineConfig config) {
+        val reflections = new Reflections("io.rapidw.easybpmn.engine");
+        val entities = reflections.getTypesAnnotatedWith(Entity.class);
+
         StandardServiceRegistry registry = new StandardServiceRegistryBuilder()
             .configure() // configures settings from hibernate.cfg.xml
             .build();
         this.sessionFactory = new MetadataSources(registry)
+            .addAnnotatedClasses(entities.toArray(new Class[0]))
             .buildMetadata()
             .getSessionFactoryBuilder()
             .applyInterceptor(new SessionFactoryInterceptor(this))
@@ -62,10 +70,13 @@ public class ProcessEngine {
 
 //        this.entityManagerFactory = Persistence.createEntityManagerFactory("easy-bpmn");
         this.objectMapper = new ObjectMapper();
+//        val jsonSubTypes = reflections.getTypesAnnotatedWith(JsonTypeName.class);
+//        jsonSubTypes.forEach(v -> objectMapper.registerSubtypes(new NamedType(v, v.getAnnotation(JsonTypeName.class).value())));
         this.entityManagerThreadLocal = ThreadLocal.withInitial(sessionFactory::createEntityManager);
 
         this.processRegistry = processRegistry;
         this.operationExecutor = new OperationExecutor(this);
+        this.expressionFactory = ExpressionFactory.newInstance();
 
 //        this.runtimeService = new RuntimeService(entityManagerFactory);
         this.taskRepository = new TaskRepository(entityManagerThreadLocal);
@@ -75,7 +86,7 @@ public class ProcessEngine {
         this.executionRepository = new ExecutionRepository(entityManagerThreadLocal);
     }
 
-    public void addOperation(AbstractOperation operation) {
+    public void addOperation(AbstractEngineOperation operation) {
         this.operationExecutor.addOperation(operation);
     }
 

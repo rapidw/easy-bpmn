@@ -3,7 +3,7 @@ package io.rapidw.easybpmn.engine.operation;
 import lombok.experimental.SuperBuilder;
 
 @SuperBuilder
-public class TriggerExecutionOperation extends AbstractOperation {
+public class EndExecutionEngineOperation extends AbstractEngineOperation {
     @Override
     public void execute() {
 

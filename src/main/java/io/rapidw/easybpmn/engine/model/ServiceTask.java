@@ -6,9 +6,13 @@ import lombok.EqualsAndHashCode;
 
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class Task extends Activity {
-    public static class TaskActivityBehavior implements Behavior {
-        public static TaskActivityBehavior INSTANCE = new TaskActivityBehavior();
+public class ServiceTask extends Task {
+
+    private String implementation;
+    private Operation operationRef;
+
+    public static class ServiceTaskBehavior implements Behavior {
+        public static ServiceTaskBehavior INSTANCE = new ServiceTaskBehavior();
 
         @Override
         public void execute(Execution execution) {

@@ -32,6 +32,7 @@ public class ProcessRegistry {
             .configure() // configures settings from hibernate.cfg.xml
             .build();
         this.sessionFactory = new MetadataSources(registry)
+            .addAnnotatedClasses(Deployment.class)
             .buildMetadata().buildSessionFactory();
         this.objectMapper = new ObjectMapper();
         this.deploymentService = new DeploymentService(sessionFactory);

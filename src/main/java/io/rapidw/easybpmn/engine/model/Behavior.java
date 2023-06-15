@@ -1,7 +1,7 @@
-package io.rapidw.easybpmn.engine.behavior;
+package io.rapidw.easybpmn.engine.model;
 
 import io.rapidw.easybpmn.engine.Execution;
-import io.rapidw.easybpmn.engine.operation.TakeOutgoingSequenceFlowOperation;
+import io.rapidw.easybpmn.engine.operation.TakeOutgoingSequenceFlowEngineOperation;
 
 public interface Behavior {
 
@@ -11,7 +11,7 @@ public interface Behavior {
 
     private void leave(Execution execution) {
         execution.getProcessInstance().getProcessEngine().addOperation(
-            TakeOutgoingSequenceFlowOperation.builder()
+            TakeOutgoingSequenceFlowEngineOperation.builder()
                 .executionId(execution.getId())
                 .build()
         );

@@ -4,21 +4,19 @@ import io.rapidw.easybpmn.engine.ProcessEngine;
 import io.rapidw.easybpmn.engine.model.FlowElement;
 import io.rapidw.easybpmn.engine.Execution;
 import io.rapidw.easybpmn.engine.ProcessDefinition;
+import lombok.experimental.SuperBuilder;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-public abstract class AbstractOperation {
+@SuperBuilder
+public abstract class AbstractEngineOperation {
 
     private final Integer executionId;
-    protected ProcessEngine processEngine;
 
+    protected ProcessEngine processEngine;
     protected Execution execution;
     protected ProcessDefinition processDefinition;
     protected FlowElement currentFlowElement;
-
-    protected AbstractOperation(AbstractOperationBuilder<?, ?> b) {
-        this.executionId = b.executionId;
-    }
 
     public void execute(ProcessEngine processEngine) {
         this.processEngine = processEngine;
@@ -31,53 +29,23 @@ public abstract class AbstractOperation {
 
     public abstract void execute();
 
-    protected AbstractOperation(Integer executionId) {
+    protected AbstractEngineOperation(Integer executionId) {
         this.executionId = executionId;
     }
 
     protected void planTakeOutgoingSequenceFlowsOperation(Execution execution) {
-        planOperation(TakeOutgoingSequenceFlowOperation.builder()
+        planOperation(TakeOutgoingSequenceFlowEngineOperation.builder()
             .executionId(execution.getId())
             .build());
     }
 
     protected void planContinueProcessOperation(Execution execution) {
-        planOperation(ContinueProcessOperation.builder()
+        planOperation(ContinueProcessEngineOperation.builder()
             .executionId(execution.getId())
             .build());
     }
 
-    private void planOperation(AbstractOperation operation) {
+    private void planOperation(AbstractEngineOperation operation) {
         processEngine.addOperation(operation);
-    }
-
-    public static abstract class AbstractOperationBuilder<C extends AbstractOperation, B extends AbstractOperationBuilder<C, B>> {
-        private Integer processDefinitionId;
-        private Integer processInstanceId;
-        private Integer executionId;
-
-        public B processDefinitionId(Integer processDefinitionId) {
-
-            this.processDefinitionId = processDefinitionId;
-            return self();
-        }
-
-        public B processInstanceId(Integer processInstanceId) {
-            this.processInstanceId = processInstanceId;
-            return self();
-        }
-
-        public B executionId(Integer executionId) {
-            this.executionId = executionId;
-            return self();
-        }
-
-        protected abstract B self();
-
-        public abstract C build();
-
-        public String toString() {
-            return "AbstractOperation.AbstractOperationBuilder(processDefinitionId=" + this.processDefinitionId + ", processInstanceId=" + this.processInstanceId + ", executionId=" + this.executionId + ")";
-        }
     }
 }

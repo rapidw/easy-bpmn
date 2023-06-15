@@ -3,6 +3,7 @@ package io.rapidw.easybpmn.engine.runtime;
 public class ActivityInstance {
 
     public enum State {
+        INACTIVE,
         READY,
         ACTIVE,
         COMPLETING,

@@ -32,10 +32,10 @@
         <!-- Drop and re-create the database schema on startup -->
         <property name="hbm2ddl.auto">create</property>
 
-        <mapping class="io.rapidw.easybpmn.registry.Deployment"/>
-        <mapping class="io.rapidw.easybpmn.engine.ProcessInstance"/>
-        <mapping class="io.rapidw.easybpmn.engine.Execution"/>
-        <mapping class="io.rapidw.easybpmn.engine.TaskInstance"/>
+<!--        <mapping class="io.rapidw.easybpmn.registry.Deployment"/>-->
+<!--        <mapping class="io.rapidw.easybpmn.engine.ProcessInstance"/>-->
+<!--        <mapping class="io.rapidw.easybpmn.engine.Execution"/>-->
+<!--        <mapping class="io.rapidw.easybpmn.engine.TaskInstance"/>-->
 
     </session-factory>
 

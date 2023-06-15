@@ -1,7 +1,7 @@
 package io.rapidw.easybpmn.engine;
 
 import io.rapidw.easybpmn.ProcessEngineException;
-import io.rapidw.easybpmn.engine.operation.ContinueProcessOperation;
+import io.rapidw.easybpmn.engine.operation.ContinueProcessEngineOperation;
 import io.rapidw.easybpmn.task.TaskQuery;
 import jakarta.persistence.*;
 import lombok.*;
@@ -42,6 +42,7 @@ public class ProcessInstance implements HasId {
 //    private ActivityInstance.State state;
 
     @Embedded
+    @Getter
     private Variable variable;
 
     @SneakyThrows
@@ -74,9 +75,7 @@ public class ProcessInstance implements HasId {
     public void start() {
         log.info("start process instance");
 
-        processEngine.addOperation(ContinueProcessOperation.builder()
-            .processDefinitionId(this.deploymentId)
-            .processInstanceId(this.getId())
+        processEngine.addOperation(ContinueProcessEngineOperation.builder()
             .executionId(this.executions.get(0).getId())
             .build()
         );
