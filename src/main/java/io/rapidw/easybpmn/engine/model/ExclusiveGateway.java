@@ -3,7 +3,7 @@ package io.rapidw.easybpmn.engine.model;
 import io.rapidw.easybpmn.ProcessEngineException;
 import io.rapidw.easybpmn.engine.Execution;
 import io.rapidw.easybpmn.engine.operation.ContinueProcessEngineOperation;
-import jakarta.el.StandardELContext;
+import jakarta.el.ELManager;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.SneakyThrows;
@@ -31,7 +31,7 @@ public class ExclusiveGateway extends Gateway {
             if (targetFlow == null && defaultFlow != null) {
                 targetFlow = defaultFlow;
             }
-            if (targetFlow == null ) {
+            if (targetFlow == null) {
                 throw new ProcessEngineException("no outgoing sequence flow found in exclusive gateway");
             }
             execution.setCurrentFlowElementId(targetFlow.getTargetRef().getId());
@@ -43,12 +43,15 @@ public class ExclusiveGateway extends Gateway {
 
         @SneakyThrows
         private boolean evaluateCondition(Execution execution, String conditionExpression) {
-            val  context = new StandardELContext(execution.getProcessInstance().getProcessEngine().getExpressionFactory());
-            context.addELResolver(DEFAULT_READ_ONLY_RESOLVER);
+            val manager = new ELManager();
+            manager.defineBean("execution", execution);
+            manager.defineBean("processInstance", execution.getProcessInstance());
+            manager.defineBean("processEngine", execution.getProcessInstance().getProcessEngine());
             val clazz = Class.forName(execution.getProcessInstance().getVariable().getClazz());
-            val variable = execution.getProcessInstance().getProcessEngine().getObjectMapper().readValue(execution.getProcessInstance().getVariable().getJson(), clazz);
-            context.putContext(clazz, variable);
-            return  execution.getProcessInstance().getProcessEngine().getExpressionFactory().createValueExpression(context, conditionExpression, Boolean.class).getValue(context);
+            val variable = execution.getProcessInstance().getVariable().getVariable(execution.getProcessInstance().getProcessEngine().getObjectMapper(), clazz);
+            manager.defineBean("variable", variable);
+            val context = manager.getELContext();
+            return ELManager.getExpressionFactory().createValueExpression(context, conditionExpression, Boolean.class).getValue(context);
         }
     }
 }

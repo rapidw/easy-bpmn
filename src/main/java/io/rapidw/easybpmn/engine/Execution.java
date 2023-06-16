@@ -52,8 +52,11 @@ public class Execution implements HasId {
     @Setter
     private boolean active;
 
+    @Embedded
+    private Variable variable;
+
     @Builder
-    public Execution(ProcessInstance processInstance, FlowElement initialFlowElement, Execution parent, boolean active) {
+    public Execution(ProcessInstance processInstance, FlowElement initialFlowElement, Execution parent, Variable variable, boolean active) {
         this.processInstance = processInstance;
         this.executionRepository = processInstance.getProcessEngine().getExecutionRepository();
         this.taskRepository = processInstance.getProcessEngine().getTaskRepository();
@@ -61,6 +64,7 @@ public class Execution implements HasId {
         this.parent = parent;
         this.children = new ArrayList<>();
         this.active = active;
+        this.variable = variable;
     }
 
     public TaskInstance queryTask(TaskQuery taskQuery) {
@@ -73,5 +77,13 @@ public class Execution implements HasId {
 
     public void merge() {
         this.executionRepository.merge(this);
+    }
+
+    public <T> T getVariable(Class<T> clazz) {
+        if (variable != null) {
+            return variable.getVariable(this.processInstance.getProcessEngine().getObjectMapper(), clazz);
+        } else {
+            return null;
+        }
     }
 }

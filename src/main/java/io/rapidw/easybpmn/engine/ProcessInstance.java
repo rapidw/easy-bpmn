@@ -51,17 +51,20 @@ public class ProcessInstance implements HasId {
         this.executions = new LinkedList<>();
 
         this.deploymentId = processDefinition.getId();
+
+
+        this.variable = new Variable();
+        this.variable.setClazz(variableObj.getClass().getName());
+        this.variable.setJson(processEngine.getObjectMapper().writeValueAsString(variableObj));
+
         val execution = Execution.builder()
             .processInstance(this)
             .initialFlowElement(processDefinition.getProcess().getInitialFlowElement())
             .active(true)
             .parent(null)
+            .variable(this.variable)
             .build();
         this.executions.add(execution);
-
-        this.variable = new Variable();
-        this.variable.setClazz(variableObj.getClass().getName());
-        this.variable.setJson(processEngine.getObjectMapper().writeValueAsString(variableObj));
     }
 
     public ProcessDefinition getProcessDefinition() {

@@ -1,8 +1,7 @@
 package io.rapidw.easybpmn
 
-import jakarta.el.BeanELResolver
-import jakarta.el.ExpressionFactory
-import jakarta.el.StandardELContext
+
+import jakarta.el.ELManager
 import spock.lang.Specification
 
 class ElSpec extends Specification {
@@ -11,11 +10,11 @@ class ElSpec extends Specification {
         given:
         def variable = new MyVariable()
         variable.setX(1)
-        def expressFactory = ExpressionFactory.newInstance()
-        def context = new StandardELContext(expressFactory)
-        context.addELResolver(new BeanELResolver())
-        context.putContext(MyVariable.class, variable)
-        def res = expressFactory.createValueExpression(context, "${variable.x + 1}", Integer.class).getValue(context)
+        def elManager = new ELManager()
+        elManager.defineBean("variable", variable)
+        def context = elManager.getELContext()
+        def exp = ELManager.getExpressionFactory().createValueExpression(context, '${variable.x + 1}', Integer.class)
+        def res = exp.getValue(context)
         expect:
         res == 2
     }

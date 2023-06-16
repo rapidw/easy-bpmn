@@ -70,7 +70,7 @@ class Process2Spec extends Specification {
         sf3.setId("sf3")
         sf3.setSourceRef(exclusiveGateway.getId())
         sf3.setTargetRef(computeTask.getId())
-        sf3.setConditionExpression("${variable.x > 1}")
+        sf3.setConditionExpression('${variable.x > 1}')
         process.getFlowElements().add(sf3)
 
         def sf4 = new SequenceFlow()
@@ -121,8 +121,8 @@ class Process2Spec extends Specification {
         new CountDownLatch(1).await(1, TimeUnit.SECONDS)
         def newVariable = tasks[0].getVariable(MyVariable)
         newVariable.setX(2)
-        new CountDownLatch(1).await(Integer.MAX_VALUE, TimeUnit.SECONDS)
         tasks[0].complete(newVariable)
+        new CountDownLatch(1).await(Integer.MAX_VALUE, TimeUnit.SECONDS)
         expect:
         1 == 1
 
