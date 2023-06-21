@@ -1,10 +1,11 @@
 package io.rapidw.easybpmn.engine.model;
 
-import lombok.Data;
-import lombok.EqualsAndHashCode;
+import io.rapidw.easybpmn.engine.ProcessEngine;
+import lombok.Getter;
+import lombok.Setter;
 
-@Data
-@EqualsAndHashCode(callSuper = true)
+@Getter
+@Setter
 public class Error extends RootElement {
     private String name;
     private String errorCode;

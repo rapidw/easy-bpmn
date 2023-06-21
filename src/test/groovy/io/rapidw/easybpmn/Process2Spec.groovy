@@ -40,6 +40,7 @@ class Process2Spec extends Specification {
 
         def computeTask = new ServiceTask()
         computeTask.setId("computeTask")
+        computeTask.setExpression('${variable.x=3}')
         process.getFlowElements().add(computeTask)
 
         def inclusiveGateway = new InclusiveGateway()
@@ -48,6 +49,7 @@ class Process2Spec extends Specification {
 
         def printTask = new ServiceTask()
         printTask.setId("printTask")
+        printTask.setExpression('${logger.info(variable.x)}')
         process.getFlowElements().add(printTask)
 
         def endEvent = new EndEvent()
@@ -115,9 +117,9 @@ class Process2Spec extends Specification {
 
         def variable = new MyVariable()
         variable.setX(1)
-        def processInstance = engine.startProcessInstanceById(processDefinition, variable)
+        engine.startProcessInstanceById(processDefinition, variable)
         new CountDownLatch(1).await(1, TimeUnit.SECONDS)
-        def tasks = processInstance.queryTask(TaskQuery.builder().id(1).build())
+        def tasks = engine.queryTask(TaskQuery.builder().id(1).build())
         new CountDownLatch(1).await(1, TimeUnit.SECONDS)
         def newVariable = tasks[0].getVariable(MyVariable)
         newVariable.setX(2)

@@ -10,4 +10,5 @@ import lombok.EqualsAndHashCode;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonTypeName("serviceTask")
 public class ServiceTask extends FlowNode {
+    private String expression;
 }

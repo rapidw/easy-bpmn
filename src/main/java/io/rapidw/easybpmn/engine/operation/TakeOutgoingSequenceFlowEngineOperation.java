@@ -31,7 +31,7 @@ public class TakeOutgoingSequenceFlowEngineOperation extends AbstractEngineOpera
             //reuse first execution
             execution.setCurrentFlowElementId(outgoingSequenceFlows.get(0).getId());
             execution.setActive(false);
-            this.processEngine.getExecutionRepository().merge(execution);
+//            this.processEngine.getExecutionRepository().merge(execution);
 
             outgoingExecutions.add(execution);
 
@@ -45,7 +45,7 @@ public class TakeOutgoingSequenceFlowEngineOperation extends AbstractEngineOpera
                         .initialFlowElement(sf)
                         .active(false)
                         .build();
-                    parent.addChild(child);
+                    this.execution.getChildren().add(child);
                     outgoingExecutions.add(child);
                 }
             }

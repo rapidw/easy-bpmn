@@ -1,18 +1,14 @@
 package io.rapidw.easybpmn.engine.model;
 
-import lombok.Data;
-import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.Setter;
 
-@Data
-@EqualsAndHashCode(callSuper = true)
+@Getter
+@Setter
 public class SequenceFlow extends FlowElement {
 
     private FlowNode sourceRef;
     private FlowNode targetRef;
     private String conditionExpression;
     private Boolean isImmediate;
-
-    public String toString() {
-        return "SequenceFlow(sourceRef=" + this.getSourceRef() + ", targetRef=" + this.getTargetRef() + ", conditionExpression=" + this.getConditionExpression();
-    }
 }

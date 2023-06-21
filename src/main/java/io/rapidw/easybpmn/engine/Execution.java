@@ -1,9 +1,7 @@
 package io.rapidw.easybpmn.engine;
 
+import com.google.common.collect.Lists;
 import io.rapidw.easybpmn.engine.model.FlowElement;
-import io.rapidw.easybpmn.engine.repository.ExecutionRepository;
-import io.rapidw.easybpmn.engine.repository.TaskRepository;
-import io.rapidw.easybpmn.task.TaskQuery;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
@@ -17,73 +15,52 @@ import java.util.List;
 @NoArgsConstructor
 public class Execution implements HasId {
 
+    @Transient
+    @Setter
+    @Getter
+    private ProcessEngine processEngine;
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Getter
     private Integer id;
 
     @ToString.Exclude
-    @ManyToOne
+    @ManyToOne(cascade = CascadeType.REFRESH)
     @Getter
     @JoinColumn(name = "process_instance_id")
     private ProcessInstance processInstance;
-
-    @Transient
-    @Getter
-    private TaskRepository taskRepository;
-
-    @Transient
-    private ExecutionRepository executionRepository;
 
     // flowElement id persist??
     @Getter
     @Setter
     private String currentFlowElementId;
 
-    @ManyToOne
+    @ManyToOne(cascade = CascadeType.ALL)
     @Getter
     private Execution parent;
 
+    @Getter
     @OneToMany(mappedBy = "parent")
-    private List<Execution> children;
+    private List<Execution> children = Lists.newArrayList();
 
     // todo: use it
     @Getter
     @Setter
     private boolean active;
 
-    @Embedded
+    @ManyToOne
+    @Getter
+    @Setter
     private Variable variable;
 
     @Builder
     public Execution(ProcessInstance processInstance, FlowElement initialFlowElement, Execution parent, Variable variable, boolean active) {
         this.processInstance = processInstance;
-        this.executionRepository = processInstance.getProcessEngine().getExecutionRepository();
-        this.taskRepository = processInstance.getProcessEngine().getTaskRepository();
         this.currentFlowElementId = initialFlowElement.getId();
         this.parent = parent;
         this.children = new ArrayList<>();
         this.active = active;
         this.variable = variable;
-    }
-
-    public TaskInstance queryTask(TaskQuery taskQuery) {
-        return null;
-    }
-
-    public void addChild(Execution execution) {
-        this.children.add(execution);
-    }
-
-    public void merge() {
-        this.executionRepository.merge(this);
-    }
-
-    public <T> T getVariable(Class<T> clazz) {
-        if (variable != null) {
-            return variable.getVariable(this.processInstance.getProcessEngine().getObjectMapper(), clazz);
-        } else {
-            return null;
-        }
     }
 }

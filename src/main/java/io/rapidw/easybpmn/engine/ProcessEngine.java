@@ -3,17 +3,14 @@ package io.rapidw.easybpmn.engine;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.rapidw.easybpmn.ProcessEngineException;
 import io.rapidw.easybpmn.engine.operation.AbstractEngineOperation;
-import io.rapidw.easybpmn.engine.repository.ExecutionRepository;
-import io.rapidw.easybpmn.engine.repository.ProcessDefinitionService;
-import io.rapidw.easybpmn.engine.repository.ProcessInstanceRepository;
-import io.rapidw.easybpmn.engine.repository.TaskRepository;
+import io.rapidw.easybpmn.engine.operation.ContinueProcessEngineOperation;
+import io.rapidw.easybpmn.engine.repository.*;
 import io.rapidw.easybpmn.registry.DeploymentQuery;
 import io.rapidw.easybpmn.registry.ProcessRegistry;
 import io.rapidw.easybpmn.task.TaskQuery;
 import jakarta.el.ExpressionFactory;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EntityManager;
-import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
@@ -34,7 +31,7 @@ public class ProcessEngine {
     @Getter
     private final ObjectMapper objectMapper;
     private final ProcessRegistry processRegistry;
-    @Getter(AccessLevel.PACKAGE)
+    @Getter
     private final ThreadLocal<EntityManager> entityManagerThreadLocal;
     private final OperationExecutor operationExecutor;
     @Getter
@@ -44,14 +41,25 @@ public class ProcessEngine {
     //    @Getter
 //    private final RuntimeService runtimeService;
     @Getter
-    private final TaskRepository taskRepository;
+    private final TaskInstanceRepository taskInstanceRepository;
     //    private final HistoryService historyService;
     @Getter
     private ProcessInstanceRepository processInstanceRepository;
     @Getter
-    private ProcessDefinitionService processDefinitionService;
-    @Getter
     private ExecutionRepository executionRepository;
+    @Getter
+    private VariableRepository variableRepository;
+
+//    @Getter
+//    private ProcessInstanceService processInstanceService;
+    @Getter
+    private ProcessDefinitionService processDefinitionManager;
+//    @Getter
+//    private VariableService variableService;
+//    @Getter
+//    private ExecutionService executionService;
+//    @Getter
+//    private TaskInstanceService taskInstanceService;
 
 
     public ProcessEngine(ProcessRegistry processRegistry, ProcessEngineConfig config) {
@@ -79,35 +87,64 @@ public class ProcessEngine {
         this.expressionFactory = ExpressionFactory.newInstance();
 
 //        this.runtimeService = new RuntimeService(entityManagerFactory);
-        this.taskRepository = new TaskRepository(entityManagerThreadLocal);
+        this.taskInstanceRepository = new TaskInstanceRepository(entityManagerThreadLocal);
 //        this.historyService = new HistoryService();
         this.processInstanceRepository = new ProcessInstanceRepository(entityManagerThreadLocal);
-        this.processDefinitionService = new ProcessDefinitionService();
+
         this.executionRepository = new ExecutionRepository(entityManagerThreadLocal);
+        this.variableRepository = new VariableRepository(entityManagerThreadLocal);
+
+//        this.processInstanceService = new ProcessInstanceService(this);
+        this.processDefinitionManager = new ProcessDefinitionService();
+//        this.variableService = new VariableService(this);
+//        this.executionService = new ExecutionService(this);
+//        this.taskInstanceService = new TaskInstanceService(this);
     }
 
-    public void addOperation(AbstractEngineOperation operation) {
-        this.operationExecutor.addOperation(operation);
-    }
-
-    public ProcessInstance startProcessInstanceById(Integer id, Object variable) {
+    public void startProcessInstanceById(Integer id, Object variableObject) {
         log.info("start process instance by process id");
         val deployments = this.processRegistry.query(DeploymentQuery.builder().id(id).build());
         if (deployments.size() != 1) {
             throw new ProcessEngineException("invalid deployment id");
         }
         val definition = ProcessDefinition.builder().processEngine(this).deployment(deployments.get(0)).build();
-        processDefinitionService.put(id, definition);
-        val processInstance = new ProcessInstance(this, definition, variable);
-        this.getProcessInstanceRepository().persistAndGetId(processInstance);
-        processInstance.start();
-        return processInstance;
+        processDefinitionManager.put(id, definition);
+
+        val transaction = entityManagerThreadLocal.get().getTransaction();
+        transaction.begin();
+        // save variable
+        val variable = new Variable(objectMapper, variableObject);
+        variableRepository.persist(variable);
+
+        // create process instance
+        val processInstance = new ProcessInstance(id, variable);
+        processInstanceRepository.persist(processInstance);
+
+        val execution = Execution.builder()
+            .processInstance(processInstance)
+            .initialFlowElement(definition.getProcess().getInitialFlowElement())
+            .active(true)
+            .parent(null)
+            .variable(variable)
+            .build();
+
+        executionRepository.persist(execution);
+        processInstance.getExecutions().add(execution);
+//        this.processEngine.getProcessInstanceRepository().merge(processInstance);
+
+        transaction.commit();
+        operationExecutor.addOperation(ContinueProcessEngineOperation.builder()
+            .executionId(execution.getId())
+            .build()
+        );
     }
 
-
-    public List<TaskInstance> queryTask(TaskQuery query) {
-        try (EntityManager entityManager = sessionFactory.createEntityManager()) {
-            return taskRepository.queryTask(entityManager, query);
-        }
+    public void addOperation(AbstractEngineOperation operation) {
+        operationExecutor.addOperation(operation);
     }
+
+    public List<TaskInstance> queryTask(TaskQuery taskQuery) {
+        return this.taskInstanceRepository.query(taskQuery);
+    }
+
 }

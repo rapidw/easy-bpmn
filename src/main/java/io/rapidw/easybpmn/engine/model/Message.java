@@ -1,12 +1,13 @@
 package io.rapidw.easybpmn.engine.model;
 
-import lombok.Data;
-import lombok.EqualsAndHashCode;
+import io.rapidw.easybpmn.engine.ProcessEngine;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.util.List;
 
-@Data
-@EqualsAndHashCode(callSuper = true)
+@Getter
+@Setter
 public class Message extends RootElement {
     private String name;
     private ItemDefinition itemRef;

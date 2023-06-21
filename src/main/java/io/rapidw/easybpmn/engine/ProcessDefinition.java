@@ -3,9 +3,9 @@ package io.rapidw.easybpmn.engine;
 import io.rapidw.easybpmn.ProcessEngineException;
 import io.rapidw.easybpmn.engine.model.FlowElement;
 import io.rapidw.easybpmn.engine.model.Process;
-import io.rapidw.easybpmn.engine.model.Task;
 import io.rapidw.easybpmn.engine.serialization.*;
 import io.rapidw.easybpmn.registry.Deployment;
+import io.rapidw.easybpmn.utils.FlowElementTuple;
 import lombok.Builder;
 import lombok.Data;
 import lombok.SneakyThrows;
@@ -39,19 +39,20 @@ public class ProcessDefinition {
 
         this.process = new Process();
         val sfs = new LinkedList<SequenceFlow>();
+        val needPostProcess = new LinkedList<FlowElementTuple>();
         process.getFlowElements().forEach(fe -> {
             FlowElement flowElement;
             if (fe instanceof StartEvent startEvent) {
                 val startEventModel = new io.rapidw.easybpmn.engine.model.StartEvent();
                 startEventModel.setId(startEvent.getId());
-                startEventModel.setBehavior(startEventModel.new NoneStartEventBehavior());
+                startEventModel.setBehavior(io.rapidw.easybpmn.engine.model.StartEvent.NoneStartEventBehavior.INSTANCE);
                 this.process.setInitialFlowElement(startEventModel); // todo : set initial flow element
                 flowElement = startEventModel;
             } else if (fe instanceof UserTask userTask) {
                 val userTaskModel = new io.rapidw.easybpmn.engine.model.UserTask();
                 userTaskModel.setId(userTask.getId());
                 userTaskModel.setName(userTask.getName());
-                userTaskModel.setBehavior(Task.TaskActivityBehavior.INSTANCE);
+                userTaskModel.setBehavior(userTaskModel.new UserTaskBehavior());
                 flowElement = userTaskModel;
             } else if (fe instanceof EndEvent endEvent) {
                 val endEventModel = new io.rapidw.easybpmn.engine.model.EndEvent();
@@ -65,6 +66,7 @@ public class ProcessDefinition {
                 exclusiveGatewayModel.setName(exclusiveGateway.getName());
                 exclusiveGatewayModel.setBehavior(exclusiveGatewayModel.new ExclusiveGatewayBehavior());
                 flowElement = exclusiveGatewayModel;
+                needPostProcess.add(new FlowElementTuple(exclusiveGatewayModel, exclusiveGateway));
             } else if (fe instanceof ParallelGateway parallelGateway) {
                 val parallelGatewayModel = new io.rapidw.easybpmn.engine.model.ParallelGateway();
                 parallelGatewayModel.setId(parallelGateway.getId());
@@ -81,20 +83,26 @@ public class ProcessDefinition {
                 val serviceTaskModel = new io.rapidw.easybpmn.engine.model.ServiceTask();
                 serviceTaskModel.setId(serviceTask.getId());
                 serviceTaskModel.setName(serviceTask.getName());
-                serviceTaskModel.setBehavior(io.rapidw.easybpmn.engine.model.ServiceTask.ServiceTaskBehavior.INSTANCE);
+                serviceTaskModel.setExpression(serviceTask.getExpression());
+                serviceTaskModel.setBehavior(serviceTaskModel.new ServiceTaskBehavior());
                 flowElement = serviceTaskModel;
             } else if (fe instanceof SequenceFlow sequenceFlow) {
                 sfs.add(sequenceFlow);
                 val sequenceFlowModel = new io.rapidw.easybpmn.engine.model.SequenceFlow();
                 sequenceFlowModel.setId(sequenceFlow.getId());
+                sequenceFlowModel.setConditionExpression(sequenceFlow.getConditionExpression());
                 flowElement = sequenceFlowModel;
             } else {
                 throw new ProcessEngineException("null model");
             }
-            this.process.getFlowElementMap().put(flowElement.getId(), flowElement);
+            val res = this.process.getFlowElementMap().put(flowElement.getId(), flowElement);
+            if (res != null) {
+                throw new ProcessEngineException("duplicate flow element id " + flowElement.getId());
+            }
         });
 
         handleSequenceFlows(sfs);
+        postProcess(needPostProcess);
     }
 
     private void handleSequenceFlows(List<SequenceFlow> sfs) {
@@ -113,7 +121,26 @@ public class ProcessDefinition {
             } else {
                 throw new ProcessEngineException("source or target not instance of FlowNode");
             }
-            this.process.getFlowElementMap().put(model.getId(), model);
+        });
+    }
+
+    private void postProcess(List<FlowElementTuple> needPostProcess) {
+        needPostProcess.forEach(tuple -> {
+            if (tuple.getModel() instanceof io.rapidw.easybpmn.engine.model.ExclusiveGateway exclusiveGatewayModel) {
+                val exclusiveGateway = (ExclusiveGateway) tuple.getSerialization();
+                if (exclusiveGateway.getDefaultFlow() != null) {
+                    val defaultSequenceFlow = (io.rapidw.easybpmn.engine.model.SequenceFlow) this.process.getFlowElementMap().get(exclusiveGateway.getDefaultFlow());
+                    if (defaultSequenceFlow == null) {
+                        throw new ProcessEngineException("default sequence flow not found");
+                    }
+                    if (defaultSequenceFlow.getConditionExpression() != null) {
+                        throw new ProcessEngineException("default sequence flow should not have condition expression");
+                    }
+                    exclusiveGatewayModel.setDefaultFlow(defaultSequenceFlow);
+                }
+            } else {
+                throw new ProcessEngineException("not implemented");
+            }
         });
     }
 }

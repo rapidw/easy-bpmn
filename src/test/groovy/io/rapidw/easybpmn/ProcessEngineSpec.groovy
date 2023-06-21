@@ -3,7 +3,7 @@ package io.rapidw.easybpmn
 import com.fasterxml.jackson.databind.ObjectMapper
 import io.rapidw.easybpmn.engine.ProcessEngine
 import io.rapidw.easybpmn.engine.ProcessEngineConfig
-import io.rapidw.easybpmn.engine.repository.TaskRepository
+import io.rapidw.easybpmn.engine.repository.TaskInstanceRepository
 import io.rapidw.easybpmn.engine.serialization.*
 import io.rapidw.easybpmn.registry.ProcessRegistry
 import io.rapidw.easybpmn.registry.ProcessRegistryConfig
@@ -16,7 +16,7 @@ import java.util.concurrent.TimeUnit
 class ProcessEngineSpec extends Specification {
 //    RepositoryService repositoryService = Spy()
 //    RuntimeService runtimeService = Stub()
-    TaskRepository taskService = Stub()
+    TaskInstanceRepository taskService = Stub()
 //    HistoryService historyService = Stub()
 
     def "process engine"() {

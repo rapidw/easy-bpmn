@@ -1,14 +1,19 @@
 package io.rapidw.easybpmn.engine.model;
 
-import lombok.Data;
-import lombok.EqualsAndHashCode;
+import io.rapidw.easybpmn.engine.Execution;
+import lombok.Getter;
+import lombok.Setter;
 
-@Data
-@EqualsAndHashCode(callSuper = true)
+@Getter
+@Setter
 public class InclusiveGateway extends Gateway {
 
-    public static class InclusiveGatewayBehavior implements Behavior {
-        public static InclusiveGatewayBehavior INSTANCE = new InclusiveGatewayBehavior();
+    public static class InclusiveGatewayBehavior extends Behavior {
+        public static final InclusiveGateway.InclusiveGatewayBehavior INSTANCE = new InclusiveGateway.InclusiveGatewayBehavior();
 
+        @Override
+        public void execute(Execution execution) {
+            leave(execution);
+        }
     }
 }

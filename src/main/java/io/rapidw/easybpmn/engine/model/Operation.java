@@ -1,12 +1,11 @@
 package io.rapidw.easybpmn.engine.model;
 
-import lombok.Data;
-import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.Setter;
 
-@Data
-@EqualsAndHashCode(callSuper = true)
+@Getter
+@Setter
 public class Operation extends BaseElement {
     private Message inMessageRef;
     private Message outMessageRef;
-
 }

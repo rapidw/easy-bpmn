@@ -1,13 +1,13 @@
 package io.rapidw.easybpmn.engine.model;
 
-import lombok.Data;
-import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.Setter;
 
-@Data
-@EqualsAndHashCode(callSuper = true)
+@Getter
+@Setter
 public class StartEvent extends Event {
 
-    public class NoneStartEventBehavior implements Behavior {
-//        public static NoneStartEventBehavior INSTANCE = new NoneStartEventBehavior();
+    public static class NoneStartEventBehavior extends Behavior {
+        public static final NoneStartEventBehavior INSTANCE = new NoneStartEventBehavior();
     }
 }

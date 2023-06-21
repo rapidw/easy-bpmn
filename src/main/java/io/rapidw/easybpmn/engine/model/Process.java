@@ -2,7 +2,6 @@ package io.rapidw.easybpmn.engine.model;
 
 import com.google.common.collect.Maps;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.util.List;
@@ -11,8 +10,7 @@ import java.util.Map;
 /**
  *
  */
-//@EqualsAndHashCode(callSuper = true)
-@NoArgsConstructor
+
 @Getter
 @Setter
 public class Process extends FlowElementContainer implements CallableElement {
@@ -38,14 +36,9 @@ public class Process extends FlowElementContainer implements CallableElement {
 
 
     private FlowElement initialFlowElement;
-//    private final List<FlowElement> flowElements = Lists.newArrayList();
+    //    private final List<FlowElement> flowElements = Lists.newArrayList();
     // map key: element id
     private Map<String, FlowElement> flowElementMap = Maps.newHashMap();
 //    private List<SequenceFlow> sequenceFlows = Lists.newArrayList();
 //    private List<>
-
-//    @Builder
-    public Process(FlowElement initialFlowElement) {
-        this.initialFlowElement = initialFlowElement;
-    }
 }

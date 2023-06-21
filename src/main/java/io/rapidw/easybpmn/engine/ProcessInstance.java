@@ -1,10 +1,10 @@
 package io.rapidw.easybpmn.engine;
 
-import io.rapidw.easybpmn.ProcessEngineException;
-import io.rapidw.easybpmn.engine.operation.ContinueProcessEngineOperation;
-import io.rapidw.easybpmn.task.TaskQuery;
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.LinkedList;
@@ -17,8 +17,8 @@ import java.util.List;
 public class ProcessInstance implements HasId {
 
     @Transient
-    @Setter(AccessLevel.PACKAGE)
     @Getter
+    @Setter
     private ProcessEngine processEngine;
 
     @Getter
@@ -41,58 +41,18 @@ public class ProcessInstance implements HasId {
 
 //    private ActivityInstance.State state;
 
-    @Embedded
+    @ManyToOne(cascade = CascadeType.ALL)
     @Getter
+    @Setter
     private Variable variable;
 
+    @Version
+    private Integer version;
+
     @SneakyThrows
-    public ProcessInstance(ProcessEngine processEngine, ProcessDefinition processDefinition, Object variableObj) {
-        this.processEngine = processEngine;
+    public ProcessInstance(Integer processDefinitionId, Variable variable) {
         this.executions = new LinkedList<>();
-
-        this.deploymentId = processDefinition.getId();
-
-
-        this.variable = new Variable();
-        this.variable.setClazz(variableObj.getClass().getName());
-        this.variable.setJson(processEngine.getObjectMapper().writeValueAsString(variableObj));
-
-        val execution = Execution.builder()
-            .processInstance(this)
-            .initialFlowElement(processDefinition.getProcess().getInitialFlowElement())
-            .active(true)
-            .parent(null)
-            .variable(this.variable)
-            .build();
-        this.executions.add(execution);
-    }
-
-    public ProcessDefinition getProcessDefinition() {
-        return this.processEngine.getProcessDefinitionService().get(id);
-    }
-
-    public List<TaskInstance> queryTask(TaskQuery taskQuery) {
-        return processEngine.queryTask(taskQuery.setProcessInstanceId(this.id));
-    }
-
-    public void start() {
-        log.info("start process instance");
-
-        processEngine.addOperation(ContinueProcessEngineOperation.builder()
-            .executionId(this.executions.get(0).getId())
-            .build()
-        );
-    }
-
-    @SneakyThrows
-    @SuppressWarnings("unchecked")
-    <T> T getVariable(Class<T> tclazz) {
-
-        val clazzStr = this.variable.getClazz();
-        if (!clazzStr.equals(tclazz.getName())) {
-            throw new ProcessEngineException("variable class not the same");
-        }
-        val clazz = Class.forName(clazzStr);
-        return (T) this.processEngine.getObjectMapper().readValue(this.variable.getJson(), clazz);
+        this.deploymentId = processDefinitionId;
+        this.variable = variable;
     }
 }
