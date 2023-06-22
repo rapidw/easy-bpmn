@@ -2,7 +2,7 @@ package io.rapidw.easybpmn.engine.operation;
 
 import io.rapidw.easybpmn.engine.ProcessEngine;
 import io.rapidw.easybpmn.engine.model.FlowElement;
-import io.rapidw.easybpmn.engine.Execution;
+import io.rapidw.easybpmn.engine.runtime.Execution;
 import io.rapidw.easybpmn.engine.ProcessDefinition;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityTransaction;
@@ -11,7 +11,7 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @SuperBuilder
-public abstract class AbstractEngineOperation {
+public abstract class AbstractOperation {
 
     private final Integer executionId;
 
@@ -41,23 +41,23 @@ public abstract class AbstractEngineOperation {
 
     public abstract void execute();
 
-    protected AbstractEngineOperation(Integer executionId) {
+    protected AbstractOperation(Integer executionId) {
         this.executionId = executionId;
     }
 
     protected void planTakeOutgoingSequenceFlowsOperation(Execution execution) {
-        planOperation(TakeOutgoingSequenceFlowEngineOperation.builder()
+        planOperation(LeaveFlowElementOperation.builder()
             .executionId(execution.getId())
             .build());
     }
 
     protected void planContinueProcessOperation(Execution execution) {
-        planOperation(ContinueProcessEngineOperation.builder()
+        planOperation(EnterFlowElementOperation.builder()
             .executionId(execution.getId())
             .build());
     }
 
-    private void planOperation(AbstractEngineOperation operation) {
+    private void planOperation(AbstractOperation operation) {
         processEngine.addOperation(operation);
     }
 

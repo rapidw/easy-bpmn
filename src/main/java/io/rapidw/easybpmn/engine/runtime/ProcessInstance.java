@@ -1,5 +1,6 @@
-package io.rapidw.easybpmn.engine;
+package io.rapidw.easybpmn.engine.runtime;
 
+import io.rapidw.easybpmn.engine.ProcessEngine;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -14,7 +15,7 @@ import java.util.List;
 @Entity
 @NoArgsConstructor
 @Table(name = "process_instance")
-public class ProcessInstance implements HasId {
+public class ProcessInstance {
 
     @Transient
     @Getter

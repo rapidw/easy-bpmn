@@ -1,6 +1,6 @@
 package io.rapidw.easybpmn.engine.repository;
 
-import io.rapidw.easybpmn.engine.Variable;
+import io.rapidw.easybpmn.engine.runtime.Variable;
 import jakarta.persistence.EntityManager;
 
 public class VariableRepository extends AbstractRepository<Variable> {

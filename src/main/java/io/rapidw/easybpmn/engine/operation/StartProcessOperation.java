@@ -1,18 +1,18 @@
 package io.rapidw.easybpmn.engine.operation;
 
-import io.rapidw.easybpmn.engine.Execution;
-import io.rapidw.easybpmn.engine.ProcessInstance;
-import io.rapidw.easybpmn.engine.Variable;
+import io.rapidw.easybpmn.engine.runtime.Execution;
+import io.rapidw.easybpmn.engine.runtime.ProcessInstance;
+import io.rapidw.easybpmn.engine.runtime.Variable;
 import lombok.experimental.SuperBuilder;
 import lombok.val;
 
 @SuperBuilder
-public class StartProcessEngineOperation extends AbstractEngineOperation {
+public class StartProcessOperation extends AbstractOperation {
 
     private final Integer deploymentId;
     private final Object variable;
 
-    protected StartProcessEngineOperation(Integer deploymentId, Object variable) {
+    protected StartProcessOperation(Integer deploymentId, Object variable) {
         super((Integer) null);
         this.deploymentId = deploymentId;
         this.variable = variable;
@@ -34,14 +34,14 @@ public class StartProcessEngineOperation extends AbstractEngineOperation {
             .initialFlowElement(processDefinition.getProcess().getInitialFlowElement())
             .active(true)
             .parent(null)
-            .variable(variable.duplicate())
+            .variable(variable)
             .build();
 
         this.processEngine.getExecutionRepository().persist(execution);
         processInstance.getExecutions().add(execution);
 //        this.processEngine.getProcessInstanceRepository().merge(processInstance);
 
-        processEngine.addOperation(ContinueProcessEngineOperation.builder()
+        processEngine.addOperation(EnterFlowElementOperation.builder()
             .executionId(execution.getId())
             .build()
         );

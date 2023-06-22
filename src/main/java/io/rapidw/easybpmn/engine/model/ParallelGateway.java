@@ -7,7 +7,7 @@ import lombok.Setter;
 @Setter
 public class ParallelGateway extends Gateway {
 
-    public static class ParallelGatewayBehavior extends Behavior {
+    public static class ParallelGatewayBehavior extends FlowElementBehavior {
         public final static ParallelGateway.ParallelGatewayBehavior INSTANCE = new ParallelGateway.ParallelGatewayBehavior();
     }
 }

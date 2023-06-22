@@ -1,6 +1,6 @@
 package io.rapidw.easybpmn.engine.operation;
 
-import io.rapidw.easybpmn.engine.Execution;
+import io.rapidw.easybpmn.engine.runtime.Execution;
 import io.rapidw.easybpmn.engine.model.FlowNode;
 import io.rapidw.easybpmn.engine.model.SequenceFlow;
 import lombok.experimental.SuperBuilder;
@@ -11,7 +11,7 @@ import java.util.ArrayList;
 
 @SuperBuilder
 @Slf4j
-public class TakeOutgoingSequenceFlowEngineOperation extends AbstractEngineOperation {
+public class LeaveFlowElementOperation extends AbstractOperation {
 
     @Override
     public void execute() {
@@ -28,11 +28,8 @@ public class TakeOutgoingSequenceFlowEngineOperation extends AbstractEngineOpera
         if (!outgoingSequenceFlows.isEmpty()) {
             val outgoingExecutions = new ArrayList<Execution>(outgoingSequenceFlows.size());
 
-            //reuse first execution
+            //reuse current execution
             execution.setCurrentFlowElementId(outgoingSequenceFlows.get(0).getId());
-            execution.setActive(false);
-//            this.processEngine.getExecutionRepository().merge(execution);
-
             outgoingExecutions.add(execution);
 
             if (outgoingSequenceFlows.size() > 1) {
@@ -41,15 +38,16 @@ public class TakeOutgoingSequenceFlowEngineOperation extends AbstractEngineOpera
                     val parent = execution.getParent() != null ? execution.getParent() : execution;
 
                     val child = Execution.builder()
+                        .processInstance(execution.getProcessInstance())
                         .parent(parent)
                         .initialFlowElement(sf)
-                        .active(false)
+                        .active(true)
+                        .variable(execution.getVariable())
                         .build();
                     this.execution.getChildren().add(child);
                     outgoingExecutions.add(child);
                 }
             }
-
             outgoingExecutions.forEach(this::planContinueProcessOperation);
         } else {
             log.debug("execution finished");

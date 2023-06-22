@@ -1,4 +1,4 @@
-package io.rapidw.easybpmn.engine;
+package io.rapidw.easybpmn.engine.runtime;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.rapidw.easybpmn.ProcessEngineException;
@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
 @Entity
 @NoArgsConstructor
 @Data
-public class Variable implements HasId {
+public class Variable {
 
     @Id
     @GeneratedValue(strategy = jakarta.persistence.GenerationType.IDENTITY)
@@ -53,12 +53,5 @@ public class Variable implements HasId {
         } catch (Exception e) {
             throw new ProcessEngineException("failed to deserialize variable", e);
         }
-    }
-
-    public Variable duplicate() {
-        Variable variable = new Variable();
-        variable.setClazz(this.clazz);
-        variable.setData(this.data);
-        return variable;
     }
 }

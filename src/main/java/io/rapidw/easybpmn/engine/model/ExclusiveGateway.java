@@ -1,8 +1,8 @@
 package io.rapidw.easybpmn.engine.model;
 
 import io.rapidw.easybpmn.ProcessEngineException;
-import io.rapidw.easybpmn.engine.Execution;
-import io.rapidw.easybpmn.engine.operation.ContinueProcessEngineOperation;
+import io.rapidw.easybpmn.engine.runtime.Execution;
+import io.rapidw.easybpmn.engine.operation.EnterFlowElementOperation;
 import io.rapidw.easybpmn.utils.ElUtils;
 import lombok.Getter;
 import lombok.Setter;
@@ -14,10 +14,10 @@ public class ExclusiveGateway extends Gateway {
 
     private SequenceFlow defaultFlow;
 
-    public class ExclusiveGatewayBehavior extends Behavior {
+    public class ExclusiveGatewayBehavior extends FlowElementBehavior {
 
         @Override
-        public void execute(Execution execution) {
+        public void onEnter(Execution execution) {
             // get all outgoing sequence flows
             SequenceFlow targetFlow = null;
             for (SequenceFlow sequenceFlow : getOutgoing()) {
@@ -34,11 +34,8 @@ public class ExclusiveGateway extends Gateway {
                 throw new ProcessEngineException("no outgoing sequence flow found in exclusive gateway");
             }
             execution.setCurrentFlowElementId(targetFlow.getTargetRef().getId());
-
             execution.getProcessEngine().addOperation(
-                ContinueProcessEngineOperation.builder().executionId(execution.getId()).build());
+                EnterFlowElementOperation.builder().executionId(execution.getId()).build());
         }
-
-
     }
 }

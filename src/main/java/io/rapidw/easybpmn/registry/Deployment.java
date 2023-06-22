@@ -1,6 +1,5 @@
 package io.rapidw.easybpmn.registry;
 
-import io.rapidw.easybpmn.engine.HasId;
 import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.Data;
@@ -10,7 +9,7 @@ import lombok.NoArgsConstructor;
 @Entity
 @NoArgsConstructor
 @Table(name = "deployment")
-public class Deployment implements HasId {
+public class Deployment {
 
     @Builder
     public Deployment(String name, String model) {

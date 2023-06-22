@@ -2,9 +2,13 @@ package io.rapidw.easybpmn.engine;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.rapidw.easybpmn.ProcessEngineException;
-import io.rapidw.easybpmn.engine.operation.AbstractEngineOperation;
-import io.rapidw.easybpmn.engine.operation.ContinueProcessEngineOperation;
+import io.rapidw.easybpmn.engine.operation.AbstractOperation;
+import io.rapidw.easybpmn.engine.operation.EnterFlowElementOperation;
 import io.rapidw.easybpmn.engine.repository.*;
+import io.rapidw.easybpmn.engine.runtime.Execution;
+import io.rapidw.easybpmn.engine.runtime.ProcessInstance;
+import io.rapidw.easybpmn.engine.runtime.TaskInstance;
+import io.rapidw.easybpmn.engine.runtime.Variable;
 import io.rapidw.easybpmn.registry.DeploymentQuery;
 import io.rapidw.easybpmn.registry.ProcessRegistry;
 import io.rapidw.easybpmn.task.TaskQuery;
@@ -25,9 +29,6 @@ import java.util.List;
 @Slf4j
 public class ProcessEngine {
 
-    //    @Getter
-//    private final EntityManagerFactory entityManagerFactory;
-    private final SessionFactory sessionFactory;
     @Getter
     private final ObjectMapper objectMapper;
     private final ProcessRegistry processRegistry;
@@ -37,29 +38,17 @@ public class ProcessEngine {
     @Getter
     private final ExpressionFactory expressionFactory;
 
-
-    //    @Getter
-//    private final RuntimeService runtimeService;
     @Getter
     private final TaskInstanceRepository taskInstanceRepository;
-    //    private final HistoryService historyService;
     @Getter
-    private ProcessInstanceRepository processInstanceRepository;
+    private final ProcessInstanceRepository processInstanceRepository;
     @Getter
-    private ExecutionRepository executionRepository;
+    private final ExecutionRepository executionRepository;
     @Getter
-    private VariableRepository variableRepository;
+    private final VariableRepository variableRepository;
 
-//    @Getter
-//    private ProcessInstanceService processInstanceService;
     @Getter
-    private ProcessDefinitionService processDefinitionManager;
-//    @Getter
-//    private VariableService variableService;
-//    @Getter
-//    private ExecutionService executionService;
-//    @Getter
-//    private TaskInstanceService taskInstanceService;
+    private final ProcessDefinitionService processDefinitionManager;
 
 
     public ProcessEngine(ProcessRegistry processRegistry, ProcessEngineConfig config) {
@@ -69,7 +58,7 @@ public class ProcessEngine {
         StandardServiceRegistry registry = new StandardServiceRegistryBuilder()
             .configure() // configures settings from hibernate.cfg.xml
             .build();
-        this.sessionFactory = new MetadataSources(registry)
+        SessionFactory sessionFactory = new MetadataSources(registry)
             .addAnnotatedClasses(entities.toArray(new Class[0]))
             .buildMetadata()
             .getSessionFactoryBuilder()
@@ -86,19 +75,13 @@ public class ProcessEngine {
         this.operationExecutor = new OperationExecutor(this);
         this.expressionFactory = ExpressionFactory.newInstance();
 
-//        this.runtimeService = new RuntimeService(entityManagerFactory);
         this.taskInstanceRepository = new TaskInstanceRepository(entityManagerThreadLocal);
-//        this.historyService = new HistoryService();
         this.processInstanceRepository = new ProcessInstanceRepository(entityManagerThreadLocal);
 
         this.executionRepository = new ExecutionRepository(entityManagerThreadLocal);
         this.variableRepository = new VariableRepository(entityManagerThreadLocal);
 
-//        this.processInstanceService = new ProcessInstanceService(this);
         this.processDefinitionManager = new ProcessDefinitionService();
-//        this.variableService = new VariableService(this);
-//        this.executionService = new ExecutionService(this);
-//        this.taskInstanceService = new TaskInstanceService(this);
     }
 
     public void startProcessInstanceById(Integer id, Object variableObject) {
@@ -133,13 +116,13 @@ public class ProcessEngine {
 //        this.processEngine.getProcessInstanceRepository().merge(processInstance);
 
         transaction.commit();
-        operationExecutor.addOperation(ContinueProcessEngineOperation.builder()
+        operationExecutor.addOperation(EnterFlowElementOperation.builder()
             .executionId(execution.getId())
             .build()
         );
     }
 
-    public void addOperation(AbstractEngineOperation operation) {
+    public void addOperation(AbstractOperation operation) {
         operationExecutor.addOperation(operation);
     }
 

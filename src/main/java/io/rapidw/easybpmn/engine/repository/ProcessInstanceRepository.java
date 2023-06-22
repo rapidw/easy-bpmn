@@ -1,6 +1,6 @@
 package io.rapidw.easybpmn.engine.repository;
 
-import io.rapidw.easybpmn.engine.ProcessInstance;
+import io.rapidw.easybpmn.engine.runtime.ProcessInstance;
 import jakarta.persistence.EntityManager;
 
 public class ProcessInstanceRepository extends AbstractRepository<ProcessInstance> {

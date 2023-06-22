@@ -1,8 +1,9 @@
-package io.rapidw.easybpmn.engine;
+package io.rapidw.easybpmn.engine.runtime;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import io.rapidw.easybpmn.ProcessEngineException;
-import io.rapidw.easybpmn.engine.operation.TakeOutgoingSequenceFlowEngineOperation;
+import io.rapidw.easybpmn.engine.*;
+import io.rapidw.easybpmn.engine.operation.LeaveFlowElementOperation;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
@@ -11,7 +12,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @NoArgsConstructor
 @Table(name = "task_instance")
-public class TaskInstance implements HasId {
+public class TaskInstance {
 
     @Transient
     @Getter
@@ -63,14 +64,16 @@ public class TaskInstance implements HasId {
 
         this.setVariable(variable);
         // new execution and set variable
-        val newExecution = Execution.builder()
+        val child = Execution.builder()
             .processInstance(this.getExecution().getProcessInstance())
             .parent(this.getExecution())
             .initialFlowElement(processEngine.getProcessDefinitionManager().get(this.getExecution().getProcessInstance().getDeploymentId()).getProcess().getFlowElementMap().get(this.getUserTaskId()))
             .variable(variable)
+            .active(true)
             .build();
-        this.getExecution().getChildren().add(newExecution);
-        this.processEngine.getExecutionRepository().persist(newExecution);
+        this.getExecution().getChildren().add(child);
+        this.processEngine.getExecutionRepository().persist(child);
+        this.getExecution().setActive(false);
 
         // set variable to process instance
 //        this.processInstance.getVariable().setJson(this.variable.getJson());
@@ -79,8 +82,8 @@ public class TaskInstance implements HasId {
 
         transaction.commit();
 
-        processEngine.addOperation(TakeOutgoingSequenceFlowEngineOperation.builder()
-            .executionId(newExecution.getId())
+        processEngine.addOperation(LeaveFlowElementOperation.builder()
+            .executionId(child.getId())
             .build());
         log.debug("completing task instance: {}", this.id);
     }

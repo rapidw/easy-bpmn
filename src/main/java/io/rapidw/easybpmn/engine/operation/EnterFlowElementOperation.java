@@ -8,7 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 
 @SuperBuilder
 @Slf4j
-public class ContinueProcessEngineOperation extends AbstractEngineOperation {
+public class EnterFlowElementOperation extends AbstractOperation {
 
     @Override
     public void execute() {
@@ -22,7 +22,7 @@ public class ContinueProcessEngineOperation extends AbstractEngineOperation {
     }
 
     private void handleFlowNode(FlowNode flowNode) {
-        flowNode.getBehavior().execute(execution);
+        flowNode.getFlowElementBehavior().onEnter(execution);
     }
 
     private void notImplemented() {

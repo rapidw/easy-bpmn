@@ -7,7 +7,7 @@ import lombok.Setter;
 @Setter
 public class StartEvent extends Event {
 
-    public static class NoneStartEventBehavior extends Behavior {
+    public static class NoneStartEventBehavior extends FlowElementBehavior {
         public static final NoneStartEventBehavior INSTANCE = new NoneStartEventBehavior();
     }
 }

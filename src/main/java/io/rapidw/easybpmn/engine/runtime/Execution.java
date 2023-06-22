@@ -1,6 +1,7 @@
-package io.rapidw.easybpmn.engine;
+package io.rapidw.easybpmn.engine.runtime;
 
 import com.google.common.collect.Lists;
+import io.rapidw.easybpmn.engine.ProcessEngine;
 import io.rapidw.easybpmn.engine.model.FlowElement;
 import jakarta.persistence.*;
 import lombok.*;
@@ -13,7 +14,7 @@ import java.util.List;
 @Entity
 @Table(name = "execution")
 @NoArgsConstructor
-public class Execution implements HasId {
+public class Execution {
 
     @Transient
     @Setter
@@ -44,7 +45,6 @@ public class Execution implements HasId {
     @OneToMany(mappedBy = "parent")
     private List<Execution> children = Lists.newArrayList();
 
-    // todo: use it
     @Getter
     @Setter
     private boolean active;

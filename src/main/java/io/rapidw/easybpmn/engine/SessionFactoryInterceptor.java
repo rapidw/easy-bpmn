@@ -1,5 +1,8 @@
 package io.rapidw.easybpmn.engine;
 
+import io.rapidw.easybpmn.engine.runtime.Execution;
+import io.rapidw.easybpmn.engine.runtime.ProcessInstance;
+import io.rapidw.easybpmn.engine.runtime.TaskInstance;
 import lombok.RequiredArgsConstructor;
 import org.hibernate.CallbackException;
 import org.hibernate.Interceptor;

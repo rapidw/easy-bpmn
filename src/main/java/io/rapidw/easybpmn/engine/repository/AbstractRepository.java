@@ -1,6 +1,5 @@
 package io.rapidw.easybpmn.engine.repository;
 
-import io.rapidw.easybpmn.engine.HasId;
 import jakarta.persistence.EntityManager;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
@@ -8,7 +7,7 @@ import lombok.val;
 import java.lang.reflect.ParameterizedType;
 
 @Slf4j
-public class AbstractRepository<T extends HasId> {
+public class AbstractRepository<T> {
     protected ThreadLocal<EntityManager> entityManagerThreadLocal;
     private final Class<T> clazz;
 

@@ -1,7 +1,7 @@
 package io.rapidw.easybpmn.utils;
 
 import io.rapidw.easybpmn.ProcessEngineException;
-import io.rapidw.easybpmn.engine.Execution;
+import io.rapidw.easybpmn.engine.runtime.Execution;
 import jakarta.el.ELException;
 import jakarta.el.ELManager;
 import lombok.extern.slf4j.Slf4j;

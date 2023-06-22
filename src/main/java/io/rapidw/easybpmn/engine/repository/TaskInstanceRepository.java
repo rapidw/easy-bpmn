@@ -1,8 +1,8 @@
 package io.rapidw.easybpmn.engine.repository;
 
 import com.querydsl.jpa.impl.JPAQuery;
-import io.rapidw.easybpmn.engine.QTaskInstance;
-import io.rapidw.easybpmn.engine.TaskInstance;
+import io.rapidw.easybpmn.engine.runtime.QTaskInstance;
+import io.rapidw.easybpmn.engine.runtime.TaskInstance;
 import io.rapidw.easybpmn.task.TaskQuery;
 import jakarta.persistence.EntityManager;
 import lombok.val;
@@ -15,13 +15,8 @@ public class TaskInstanceRepository extends AbstractRepository<TaskInstance> {
     }
 
     public List<TaskInstance> query(TaskQuery taskQuery) {
-        val entityManager = entityManagerThreadLocal.get();
-        val transaction = entityManager.getTransaction();
-        transaction.begin();
-        JPAQuery<TaskInstance> executionJPAQuery = new JPAQuery<>(entityManagerThreadLocal.get());
+        JPAQuery<TaskInstance> executionJPAQuery = new JPAQuery<>(getEntityManager());
         val q = QTaskInstance.taskInstance;
-        val res = executionJPAQuery.from(q).where(q.processInstance.id.eq(taskQuery.getId())).fetch();
-        transaction.commit();
-        return res;
+        return executionJPAQuery.from(q).where(q.processInstance.id.eq(taskQuery.getId())).fetch();
     }
 }

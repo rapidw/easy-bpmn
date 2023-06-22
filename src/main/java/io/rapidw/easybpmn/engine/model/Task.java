@@ -1,6 +1,6 @@
 package io.rapidw.easybpmn.engine.model;
 
-import io.rapidw.easybpmn.engine.Execution;
+import io.rapidw.easybpmn.engine.runtime.Execution;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -8,11 +8,11 @@ import lombok.Setter;
 @Setter
 public class Task extends Activity {
 
-    public static class TaskActivityBehavior extends Behavior {
+    public static class TaskActivityBehavior extends FlowElementBehavior {
         public static final TaskActivityBehavior INSTANCE = new TaskActivityBehavior();
 
         @Override
-        public void execute(Execution execution) {
+        public void onEnter(Execution execution) {
             // do nothing
         }
     }

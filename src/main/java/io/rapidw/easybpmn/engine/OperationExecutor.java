@@ -1,6 +1,6 @@
 package io.rapidw.easybpmn.engine;
 
-import io.rapidw.easybpmn.engine.operation.AbstractEngineOperation;
+import io.rapidw.easybpmn.engine.operation.AbstractOperation;
 import jakarta.persistence.EntityManager;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
@@ -40,7 +40,7 @@ public class OperationExecutor {
         };
     }
 
-    public void addOperation(AbstractEngineOperation operation) {
+    public void addOperation(AbstractOperation operation) {
         this.executorService.submit(() -> {
             log.debug("EXECUTING OPERATION {}", operation.getClass().getSimpleName());
             operation.execute(this.processEngine);
