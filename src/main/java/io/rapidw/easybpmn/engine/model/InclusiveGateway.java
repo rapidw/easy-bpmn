@@ -1,6 +1,8 @@
 package io.rapidw.easybpmn.engine.model;
 
+import io.rapidw.easybpmn.ProcessEngineException;
 import io.rapidw.easybpmn.engine.runtime.Execution;
+import io.rapidw.easybpmn.utils.ElUtils;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
@@ -14,11 +16,13 @@ import java.util.List;
 @Slf4j
 public class InclusiveGateway extends Gateway {
 
-    public static class InclusiveGatewayBehavior extends FlowElementBehavior {
-        public static final InclusiveGateway.InclusiveGatewayBehavior INSTANCE = new InclusiveGateway.InclusiveGatewayBehavior();
+    private SequenceFlow defaultFlow;
+
+    public class InclusiveGatewayBehavior extends FlowElementBehavior {
 
         @Override
         public void onEnter(Execution execution) {
+            // enter inclusive gateway: wait for all available incoming sequence flows to arrive
             log.debug("enter inclusive gateway {} in process instance {}", execution.getCurrentFlowElementId(), execution.getProcessInstance().getId());
             val activeExecutions = execution.getProcessEngine().getExecutionRepository().getAllActiveExecutionByProcessInstance(execution.getProcessInstance());
             boolean leave = true;
@@ -32,8 +36,26 @@ public class InclusiveGateway extends Gateway {
                 }
             }
             log.debug("leave {}", leave);
-            // todo: leave inclusive gateway
-            if (leave) leave(execution);
+            //  leave inclusive gateway: continue sequence flow of true
+            if (leave) {
+
+                val variableObject = execution.getVariable().deserialize(execution.getProcessEngine().getObjectMapper());
+                List<SequenceFlow> targetFlows = new ArrayList<>();
+                for (SequenceFlow sequenceFlow : getOutgoing()) {
+                    if (sequenceFlow.getConditionExpression() != null && ElUtils.evaluateBooleanCondition(execution, sequenceFlow.getConditionExpression(), variableObject)) {
+                        targetFlows.add(sequenceFlow);
+                    }
+                    if (targetFlows.isEmpty()) {
+                        if (getDefaultFlow() != null) {
+                            targetFlows.add(getDefaultFlow());
+                        } else {
+                            throw new ProcessEngineException("no outgoing sequence flow found in inclusive gateway");
+                        }
+                    }
+
+                    leave(execution, targetFlows);
+                }
+            }
         }
 
         private boolean mayHavePathToCurrentElement(String currentFlowElementId, Execution execution) {

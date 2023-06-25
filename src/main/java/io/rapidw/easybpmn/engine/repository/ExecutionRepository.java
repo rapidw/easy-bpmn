@@ -24,4 +24,15 @@ public class ExecutionRepository extends AbstractRepository<Execution> {
         log.debug("getAllActiveExecutionByProcessInstance, count {}", res.size());
         return res;
     }
+
+    public Execution getOneByProcessInstanceAndCurrentFlowElementId(ProcessInstance processInstance, String currentFlowElementId) {
+        val query = new JPAQuery<Execution>(getEntityManager());
+        val q = QExecution.execution;
+        val res = query.from(q).where(
+            q.processInstance.eq(processInstance),
+            q.currentFlowElementId.eq(currentFlowElementId)
+        ).fetchOne();
+        log.debug("getOneByProcessInstanceAndCurrentFlowElementId, {}", res);
+        return res;
+    }
 }

@@ -1,7 +1,7 @@
 package io.rapidw.easybpmn.engine.repository;
 
 import com.google.common.collect.Maps;
-import io.rapidw.easybpmn.engine.ProcessDefinition;
+import io.rapidw.easybpmn.engine.runtime.ProcessDefinition;
 
 import java.util.Map;
 

@@ -1,5 +1,6 @@
-package io.rapidw.easybpmn.engine;
+package io.rapidw.easybpmn.engine.runtime;
 
+import io.rapidw.easybpmn.engine.ProcessEngine;
 import io.rapidw.easybpmn.engine.operation.AbstractOperation;
 import jakarta.persistence.EntityManager;
 import lombok.extern.slf4j.Slf4j;

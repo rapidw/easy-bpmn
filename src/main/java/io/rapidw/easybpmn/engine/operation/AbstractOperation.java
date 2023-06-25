@@ -3,7 +3,7 @@ package io.rapidw.easybpmn.engine.operation;
 import io.rapidw.easybpmn.engine.ProcessEngine;
 import io.rapidw.easybpmn.engine.model.FlowElement;
 import io.rapidw.easybpmn.engine.runtime.Execution;
-import io.rapidw.easybpmn.engine.ProcessDefinition;
+import io.rapidw.easybpmn.engine.runtime.ProcessDefinition;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityTransaction;
 import lombok.experimental.SuperBuilder;
@@ -45,7 +45,7 @@ public abstract class AbstractOperation {
         this.executionId = executionId;
     }
 
-    protected void planTakeOutgoingSequenceFlowsOperation(Execution execution) {
+    protected void planLeaveFlowElementOperation(Execution execution) {
         planOperation(LeaveFlowElementOperation.builder()
             .executionId(execution.getId())
             .build());
