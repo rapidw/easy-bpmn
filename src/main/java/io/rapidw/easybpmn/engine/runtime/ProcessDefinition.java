@@ -78,7 +78,7 @@ public class ProcessDefinition {
                 val inclusiveGatewayModel = new io.rapidw.easybpmn.engine.model.InclusiveGateway();
                 inclusiveGatewayModel.setId(inclusiveGateway.getId());
                 inclusiveGatewayModel.setName(inclusiveGateway.getName());
-                inclusiveGatewayModel.setFlowElementBehavior(io.rapidw.easybpmn.engine.model.InclusiveGateway.InclusiveGatewayBehavior.INSTANCE);
+                inclusiveGatewayModel.setFlowElementBehavior(inclusiveGatewayModel.new InclusiveGatewayBehavior());
                 flowElement = inclusiveGatewayModel;
             } else if (fe instanceof ServiceTask serviceTask) {
                 val serviceTaskModel = new io.rapidw.easybpmn.engine.model.ServiceTask();
