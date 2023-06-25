@@ -8,6 +8,8 @@ import jakarta.persistence.*;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 
+import java.time.Instant;
+
 @Entity
 @Slf4j
 @NoArgsConstructor
@@ -36,7 +38,8 @@ public class TaskInstance {
     @Getter
     private String userTaskId;
 
-    private String assignee;
+    // effective executor
+    private String executor;
     private String name;
 
     @ManyToOne(cascade = CascadeType.ALL)
@@ -45,11 +48,14 @@ public class TaskInstance {
     @JoinColumn(name = "variable_id")
     private Variable variable;
 
+    private Instant startTime;
+    private Instant finishTime;
+
     @Builder
-    public TaskInstance(Execution execution, String userTaskId, String assignee, String name, Variable variable) {
+    public TaskInstance(Execution execution, String userTaskId, String executor, String name, Variable variable) {
         this.processInstance = execution.getProcessInstance();
         this.execution = execution;
-        this.assignee = assignee;
+        this.executor = executor;
         this.name = name;
         this.variable = variable;
         this.userTaskId = userTaskId;
