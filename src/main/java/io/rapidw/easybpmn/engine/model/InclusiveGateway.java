@@ -2,7 +2,6 @@ package io.rapidw.easybpmn.engine.model;
 
 import io.rapidw.easybpmn.ProcessEngineException;
 import io.rapidw.easybpmn.engine.runtime.Execution;
-import io.rapidw.easybpmn.utils.ElUtils;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
@@ -42,7 +41,8 @@ public class InclusiveGateway extends Gateway {
                 val variableObject = execution.getVariable().deserialize(execution.getProcessEngine().getObjectMapper());
                 List<SequenceFlow> targetFlows = new ArrayList<>();
                 for (SequenceFlow sequenceFlow : getOutgoing()) {
-                    if (sequenceFlow.getConditionExpression() != null && ElUtils.evaluateBooleanCondition(execution, sequenceFlow.getConditionExpression(), variableObject)) {
+                    if (sequenceFlow.getConditionExpression() != null
+                        && sequenceFlow.getExpressionType().evaluateToBoolean(execution, sequenceFlow.getConditionExpression(), variableObject)) {
                         targetFlows.add(sequenceFlow);
                     }
                     if (targetFlows.isEmpty()) {

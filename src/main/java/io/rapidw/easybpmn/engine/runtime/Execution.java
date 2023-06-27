@@ -32,7 +32,6 @@ public class Execution {
     @JoinColumn(name = "process_instance_id")
     private ProcessInstance processInstance;
 
-    // flowElement id persist??
     @Getter
     @Setter
     private String currentFlowElementId;

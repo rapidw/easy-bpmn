@@ -1,9 +1,8 @@
 package io.rapidw.easybpmn.engine.model;
 
 import io.rapidw.easybpmn.ProcessEngineException;
-import io.rapidw.easybpmn.engine.runtime.Execution;
 import io.rapidw.easybpmn.engine.operation.EnterFlowElementOperation;
-import io.rapidw.easybpmn.utils.ElUtils;
+import io.rapidw.easybpmn.engine.runtime.Execution;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.val;
@@ -22,7 +21,7 @@ public class ExclusiveGateway extends Gateway {
             SequenceFlow targetFlow = null;
             for (SequenceFlow sequenceFlow : getOutgoing()) {
                 val variableObject = execution.getVariable().deserialize(execution.getProcessEngine().getObjectMapper());
-                if (sequenceFlow.getConditionExpression() != null && ElUtils.evaluateBooleanCondition(execution, sequenceFlow.getConditionExpression(), variableObject)) {
+                if (sequenceFlow.getConditionExpression() != null && sequenceFlow.getExpressionType().evaluateToBoolean(execution, sequenceFlow.getConditionExpression(), variableObject)) {
                     targetFlow = sequenceFlow;
                     break;
                 }

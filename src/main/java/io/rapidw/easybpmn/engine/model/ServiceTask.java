@@ -1,5 +1,6 @@
 package io.rapidw.easybpmn.engine.model;
 
+import io.rapidw.easybpmn.engine.common.ExpressionType;
 import io.rapidw.easybpmn.engine.runtime.Execution;
 import io.rapidw.easybpmn.engine.runtime.Variable;
 import io.rapidw.easybpmn.utils.ElUtils;
@@ -15,6 +16,10 @@ public class ServiceTask extends Task {
     private Operation operationRef;
 
     private String expression;
+    private String delegateExpression;
+    // todo
+    private ExpressionType expressionType;
+    private String javaClass;
 
     public class ServiceTaskBehavior extends FlowElementBehavior {
 

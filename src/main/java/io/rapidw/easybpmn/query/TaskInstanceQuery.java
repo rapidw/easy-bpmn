@@ -1,6 +1,6 @@
 package io.rapidw.easybpmn.query;
 
-import io.rapidw.easybpmn.engine.runtime.TaskCandidate;
+import io.rapidw.easybpmn.engine.common.Candidate;
 import lombok.Builder;
 import lombok.Data;
 import lombok.Singular;
@@ -16,5 +16,5 @@ public class TaskInstanceQuery {
     private Long id;
     private Long processInstanceId;
     @Singular
-    private List<TaskCandidate.Candidate> candidates;
+    private List<Candidate> candidates;
 }

@@ -1,5 +1,6 @@
 package io.rapidw.easybpmn.engine.model;
 
+import io.rapidw.easybpmn.engine.common.Candidate;
 import io.rapidw.easybpmn.engine.runtime.Execution;
 import io.rapidw.easybpmn.engine.runtime.TaskCandidate;
 import io.rapidw.easybpmn.engine.runtime.TaskInstance;
@@ -15,7 +16,7 @@ import java.util.List;
 public class UserTask extends Task {
 
     private String assignee;
-    private List<TaskCandidate.Candidate> candidates;
+    private List<Candidate> candidates;
 
     public class UserTaskBehavior extends FlowElementBehavior {
 

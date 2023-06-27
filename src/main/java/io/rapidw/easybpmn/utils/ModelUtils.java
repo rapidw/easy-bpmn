@@ -67,6 +67,7 @@ public class ModelUtils {
                 val sequenceFlowModel = new io.rapidw.easybpmn.engine.model.SequenceFlow();
                 sequenceFlowModel.setId(sequenceFlow.getId());
                 sequenceFlowModel.setConditionExpression(sequenceFlow.getConditionExpression());
+                sequenceFlowModel.setExpressionType(sequenceFlow.getExpressionType());
                 flowElement = sequenceFlowModel;
             } else {
                 throw new ProcessEngineException("null model");

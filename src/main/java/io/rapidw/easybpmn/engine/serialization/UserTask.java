@@ -1,7 +1,7 @@
 package io.rapidw.easybpmn.engine.serialization;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import io.rapidw.easybpmn.engine.runtime.TaskCandidate;
+import io.rapidw.easybpmn.engine.common.Candidate;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -15,5 +15,5 @@ public class UserTask extends Task {
     private String name;
 
     private String assignee;
-    private List<TaskCandidate.Candidate> candidates = new ArrayList<>();
+    private List<Candidate> candidates = new ArrayList<>();
 }

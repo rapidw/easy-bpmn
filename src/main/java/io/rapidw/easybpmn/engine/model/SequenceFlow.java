@@ -1,5 +1,6 @@
 package io.rapidw.easybpmn.engine.model;
 
+import io.rapidw.easybpmn.engine.common.ExpressionType;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -11,4 +12,7 @@ public class SequenceFlow extends FlowElement {
     private FlowNode targetRef;
     private String conditionExpression;
     private Boolean isImmediate;
+
+    // extended
+    private ExpressionType expressionType;
 }

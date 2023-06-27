@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import io.rapidw.easybpmn.engine.ProcessEngine
 import io.rapidw.easybpmn.engine.ProcessEngineConfig
 import io.rapidw.easybpmn.engine.runtime.ProcessInstance
-import io.rapidw.easybpmn.engine.runtime.TaskCandidate
 import io.rapidw.easybpmn.engine.serialization.*
 import io.rapidw.easybpmn.query.TaskInstanceQuery
 import io.rapidw.easybpmn.registry.ProcessRegistry
@@ -44,7 +43,7 @@ class TaskInstanceQuerySpec extends Specification {
         def userTask = new UserTask()
         userTask.setId("user_task")
         userTask.setName("user_task_name")
-        userTask.getCandidates().add(new TaskCandidate.Candidate(
+        userTask.getCandidates().add(new io.rapidw.easybpmn.engine.common.Candidate(
             name: "aaa",
             type: Candidate.USER
         ))
@@ -88,7 +87,7 @@ class TaskInstanceQuerySpec extends Specification {
         GROUP
     }
 
-    def "query by id"() {
+    def "query by process instance id"() {
         when:
         def tasks = engine.queryTask(TaskInstanceQuery.builder().processInstanceId(this.processInstance.getId()).build())
         then:
@@ -97,7 +96,25 @@ class TaskInstanceQuerySpec extends Specification {
         with(tasks[0]) {
             it.processInstance.getId() == this.processInstance.getId()
             userTaskId == 'user_task'
-            candidates.collect { it.candidate } as Set == [new TaskCandidate.Candidate(
+            candidates.collect { it.candidate } as Set == [new io.rapidw.easybpmn.engine.common.Candidate(
+                name: "aaa",
+                type: Candidate.USER
+            )] as Set
+        }
+    }
+
+    def "query by candidate"() {
+        when:
+        def tasks = engine.queryTask(TaskInstanceQuery.builder().candidate(new io.rapidw.easybpmn.engine.common.Candidate(
+            name: "aaa",
+            type: Candidate.USER
+        )).build())
+        then:
+        tasks.size() == 1
+        with(tasks[0]) {
+            it.processInstance.getId() == this.processInstance.getId()
+            userTaskId == 'user_task'
+            candidates.collect { it.candidate } as Set == [new io.rapidw.easybpmn.engine.common.Candidate(
                 name: "aaa",
                 type: Candidate.USER
             )] as Set

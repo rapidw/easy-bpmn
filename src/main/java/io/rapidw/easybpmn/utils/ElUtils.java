@@ -12,7 +12,7 @@ import org.slf4j.Logger;
 public class ElUtils {
     public static Logger logger = log;
 
-    public static Boolean evaluateBooleanCondition(Execution execution, String conditionExpression, Object variableObject) {
+    public static Boolean evaluateToBoolean(Execution execution, String conditionExpression, Object variableObject) {
         return evaluateCondition(execution, conditionExpression, variableObject, Boolean.class);
     }
 

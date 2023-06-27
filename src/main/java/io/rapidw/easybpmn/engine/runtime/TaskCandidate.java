@@ -1,7 +1,6 @@
 package io.rapidw.easybpmn.engine.runtime;
 
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import io.rapidw.easybpmn.engine.serialization.CandidateEnumDeserializer;
+import io.rapidw.easybpmn.engine.common.Candidate;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -19,11 +18,4 @@ public class TaskCandidate {
     @Embedded
     private Candidate candidate;
 
-    @Embeddable
-    @Data
-    public static class Candidate {
-        private String name;
-        @JsonDeserialize(using = CandidateEnumDeserializer.class)
-        private Enum<?> type;
-    }
 }
