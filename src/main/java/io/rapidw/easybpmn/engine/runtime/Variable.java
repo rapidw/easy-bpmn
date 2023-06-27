@@ -16,7 +16,7 @@ public class Variable {
 
     @Id
     @GeneratedValue(strategy = jakarta.persistence.GenerationType.IDENTITY)
-    private Integer id;
+    private Long id;
     @Column(name = "class")
     private String clazz;
     @Column(name = "data")

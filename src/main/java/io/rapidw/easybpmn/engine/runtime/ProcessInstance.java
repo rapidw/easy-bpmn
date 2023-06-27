@@ -25,11 +25,11 @@ public class ProcessInstance {
     @Getter
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+    private Long id;
 
     @Getter
     @Setter
-    private Integer deploymentId;
+    private Long deploymentId;
 
     private boolean finished;
 
@@ -51,9 +51,9 @@ public class ProcessInstance {
     private Integer version;
 
     @SneakyThrows
-    public ProcessInstance(Integer processDefinitionId, Variable variable) {
+    public ProcessInstance(Long deploymentId, Variable variable) {
         this.executions = new LinkedList<>();
-        this.deploymentId = processDefinitionId;
+        this.deploymentId = deploymentId;
         this.variable = variable;
     }
 }

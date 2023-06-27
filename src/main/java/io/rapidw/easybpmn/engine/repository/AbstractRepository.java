@@ -36,7 +36,7 @@ public class AbstractRepository<T> {
         return object;
     }
 
-    public T get(Integer id) {
+    public T get(Long id) {
         log.debug("get {} by id {}", clazz.getSimpleName(), id);
         val entityManager = getEntityManager();
         val res = entityManager.find(clazz, id);

@@ -26,6 +26,8 @@ public class ModelUtils {
                 val userTaskModel = new io.rapidw.easybpmn.engine.model.UserTask();
                 userTaskModel.setId(userTask.getId());
                 userTaskModel.setName(userTask.getName());
+                userTaskModel.setAssignee(userTask.getAssignee());
+                userTaskModel.setCandidates(userTask.getCandidates());
                 userTaskModel.setFlowElementBehavior(userTaskModel.new UserTaskBehavior());
                 flowElement = userTaskModel;
             } else if (fe instanceof EndEvent endEvent) {

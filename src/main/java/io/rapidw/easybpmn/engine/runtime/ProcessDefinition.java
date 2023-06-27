@@ -16,7 +16,7 @@ import lombok.val;
 public class ProcessDefinition {
     private ProcessEngine processEngine;
 
-    private Integer id;
+    private Long id;
     private Deployment deployment;
     private Process process;
 
@@ -30,7 +30,9 @@ public class ProcessDefinition {
 
     @SneakyThrows
     public void buildModel() {
-        val bpmn = this.processEngine.getObjectMapper().readValue(this.deployment.getModel(), Bpmn.class);
+        val bpmn = this.processEngine.getObjectMapper().reader()
+            .withAttribute("candidateEnumClass", processEngine.getProcessRegistry().getConfig().getCandidateEnumClass())
+            .readValue(this.deployment.getModel(), Bpmn.class);
         val process = bpmn.getDefinitions().getProcesses().get(0);
         this.process = ModelUtils.buildModel(process);
     }

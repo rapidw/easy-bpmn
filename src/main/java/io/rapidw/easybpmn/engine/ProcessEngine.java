@@ -6,9 +6,10 @@ import io.rapidw.easybpmn.engine.operation.AbstractOperation;
 import io.rapidw.easybpmn.engine.operation.EnterFlowElementOperation;
 import io.rapidw.easybpmn.engine.repository.*;
 import io.rapidw.easybpmn.engine.runtime.*;
+import io.rapidw.easybpmn.query.TaskInstanceQuery;
 import io.rapidw.easybpmn.registry.DeploymentQuery;
 import io.rapidw.easybpmn.registry.ProcessRegistry;
-import io.rapidw.easybpmn.task.TaskQuery;
+import io.rapidw.easybpmn.utils.TransactionUtils;
 import jakarta.el.ExpressionFactory;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EntityManager;
@@ -27,7 +28,10 @@ import java.util.List;
 public class ProcessEngine {
 
     @Getter
+    private final ProcessEngineConfig config;
+    @Getter
     private final ObjectMapper objectMapper;
+    @Getter
     private final ProcessRegistry processRegistry;
     @Getter
     private final ThreadLocal<EntityManager> entityManagerThreadLocal;
@@ -43,12 +47,15 @@ public class ProcessEngine {
     private final ExecutionRepository executionRepository;
     @Getter
     private final VariableRepository variableRepository;
+    @Getter
+    private final TaskAssignmentRepository taskCandidateRepository;
 
     @Getter
     private final ProcessDefinitionService processDefinitionManager;
 
 
     public ProcessEngine(ProcessRegistry processRegistry, ProcessEngineConfig config) {
+        this.config = config;
         val reflections = new Reflections("io.rapidw.easybpmn.engine");
         val entities = reflections.getTypesAnnotatedWith(Entity.class);
 
@@ -77,11 +84,12 @@ public class ProcessEngine {
 
         this.executionRepository = new ExecutionRepository(entityManagerThreadLocal);
         this.variableRepository = new VariableRepository(entityManagerThreadLocal);
+        this.taskCandidateRepository = new TaskAssignmentRepository(entityManagerThreadLocal);
 
         this.processDefinitionManager = new ProcessDefinitionService();
     }
 
-    public void startProcessInstanceById(Integer id, Object variableObject) {
+    public ProcessInstance startProcessInstanceById(Long id, Object variableObject) {
         log.info("start process instance by process id");
         val deployments = this.processRegistry.query(DeploymentQuery.builder().id(id).build());
         if (deployments.size() != 1) {
@@ -90,41 +98,42 @@ public class ProcessEngine {
         val definition = ProcessDefinition.builder().processEngine(this).deployment(deployments.get(0)).build();
         processDefinitionManager.put(id, definition);
 
-        val transaction = entityManagerThreadLocal.get().getTransaction();
-        transaction.begin();
-        // save variable
-        val variable = new Variable(objectMapper, variableObject);
-        variableRepository.persist(variable);
+        return TransactionUtils.runWithTransaction(this, () -> {
+            // save variable
+            val variable = new Variable(objectMapper, variableObject);
+            variableRepository.persist(variable);
 
-        // create process instance
-        val processInstance = new ProcessInstance(id, variable);
-        processInstanceRepository.persist(processInstance);
+            // create process instance
+            val processInstance = new ProcessInstance(id, variable);
+            processInstanceRepository.persist(processInstance);
 
-        val execution = Execution.builder()
-            .processInstance(processInstance)
-            .initialFlowElement(definition.getProcess().getInitialFlowElement())
-            .active(true)
-            .parent(null)
-            .variable(variable)
-            .build();
+            val execution = Execution.builder()
+                .processInstance(processInstance)
+                .initialFlowElement(definition.getProcess().getInitialFlowElement())
+                .active(true)
+                .parent(null)
+                .variable(variable)
+                .build();
 
-        executionRepository.persist(execution);
-        processInstance.getExecutions().add(execution);
+            executionRepository.persist(execution);
+            processInstance.getExecutions().add(execution);
 //        this.processEngine.getProcessInstanceRepository().merge(processInstance);
 
-        transaction.commit();
-        operationExecutor.addOperation(EnterFlowElementOperation.builder()
-            .executionId(execution.getId())
-            .build()
-        );
+
+            operationExecutor.addOperation(EnterFlowElementOperation.builder()
+                .executionId(execution.getId())
+                .build()
+            );
+            return processInstance;
+        });
     }
 
     public void addOperation(AbstractOperation operation) {
         operationExecutor.addOperation(operation);
     }
 
-    public List<TaskInstance> queryTask(TaskQuery taskQuery) {
-        return this.taskInstanceRepository.query(taskQuery);
+    public List<TaskInstance> queryTask(TaskInstanceQuery taskInstanceQuery) {
+        return this.taskInstanceRepository.query(taskInstanceQuery);
     }
 
 }

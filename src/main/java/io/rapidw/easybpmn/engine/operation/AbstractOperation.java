@@ -13,7 +13,7 @@ import lombok.extern.slf4j.Slf4j;
 @SuperBuilder
 public abstract class AbstractOperation {
 
-    private final Integer executionId;
+    private final Long executionId;
 
     protected ProcessEngine processEngine;
     protected Execution execution;
@@ -41,7 +41,7 @@ public abstract class AbstractOperation {
 
     public abstract void execute();
 
-    protected AbstractOperation(Integer executionId) {
+    protected AbstractOperation(Long executionId) {
         this.executionId = executionId;
     }
 

@@ -6,7 +6,7 @@ import io.rapidw.easybpmn.engine.ProcessEngineConfig
 import io.rapidw.easybpmn.engine.serialization.*
 import io.rapidw.easybpmn.registry.ProcessRegistry
 import io.rapidw.easybpmn.registry.ProcessRegistryConfig
-import io.rapidw.easybpmn.task.TaskQuery
+import io.rapidw.easybpmn.query.TaskInstanceQuery
 import spock.lang.Specification
 
 import java.util.concurrent.CountDownLatch
@@ -119,7 +119,7 @@ class Process2Spec extends Specification {
         variable.setX(1)
         engine.startProcessInstanceById(processDefinition, variable)
         new CountDownLatch(1).await(1, TimeUnit.SECONDS)
-        def tasks = engine.queryTask(TaskQuery.builder().id(1).build())
+        def tasks = engine.queryTask(TaskInstanceQuery.builder().id(1).build())
         new CountDownLatch(1).await(1, TimeUnit.SECONDS)
         def newVariable = tasks[0].getVariable(MyVariable)
         newVariable.setX(2)

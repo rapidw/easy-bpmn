@@ -16,7 +16,7 @@ public class DeploymentService {
         this.entityManagerFactory = entityManagerFactory;
     }
 
-    public Integer deploy(EntityManager entityManager, Deployment deployment) {
+    public Long deploy(EntityManager entityManager, Deployment deployment) {
         log.debug("deploy start");
         val id = persistAndGetId(deployment);
         log.debug("deploy finished");
@@ -37,7 +37,7 @@ public class DeploymentService {
         return jpaQuery.where(where).fetch();
     }
 
-    private Integer persistAndGetId(Deployment deployment) {
+    private Long persistAndGetId(Deployment deployment) {
         val entityManager = entityManagerFactory.createEntityManager();
         entityManager.getTransaction().begin();
         entityManager.persist(deployment);

@@ -9,11 +9,11 @@ import lombok.val;
 @SuperBuilder
 public class StartProcessOperation extends AbstractOperation {
 
-    private final Integer deploymentId;
+    private final Long deploymentId;
     private final Object variable;
 
-    protected StartProcessOperation(Integer deploymentId, Object variable) {
-        super((Integer) null);
+    protected StartProcessOperation(Long deploymentId, Object variable) {
+        super((Long) null);
         this.deploymentId = deploymentId;
         this.variable = variable;
     }

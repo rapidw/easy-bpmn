@@ -17,6 +17,7 @@ import java.util.List;
 
 @Slf4j
 public class ProcessRegistry {
+    @Getter
     private ProcessRegistryConfig config;
 //    private EntityManagerFactory entityManagerFactory;
     private SessionFactory sessionFactory;
@@ -39,8 +40,10 @@ public class ProcessRegistry {
     }
 
     @SneakyThrows
-    public Integer deploy(String model) {
-        val bpmn = this.objectMapper.readValue(model, Bpmn.class);
+    public Long deploy(String model) {
+        val bpmn = this.objectMapper.reader()
+            .withAttribute("candidateEnumClass", config.getCandidateEnumClass())
+            .readValue(model, Bpmn.class);
         if (!validate(bpmn)) {
             throw new ProcessEngineException("invalid bpmn model");
         }

@@ -6,17 +6,17 @@ import io.rapidw.easybpmn.engine.runtime.ProcessDefinition;
 import java.util.Map;
 
 public class ProcessDefinitionService  {
-    private Map<Integer, ProcessDefinition> processDefinitionMap = Maps.newConcurrentMap();
+    private Map<Long, ProcessDefinition> processDefinitionMap = Maps.newConcurrentMap();
 
     public ProcessDefinitionService() {
 
     }
 
-    public void put(Integer id, ProcessDefinition processDefinition) {
+    public void put(Long id, ProcessDefinition processDefinition) {
         processDefinitionMap.put(id, processDefinition);
     }
 
-    public ProcessDefinition get(Integer id) {
+    public ProcessDefinition get(Long id) {
         return processDefinitionMap.get(id);
 
     }

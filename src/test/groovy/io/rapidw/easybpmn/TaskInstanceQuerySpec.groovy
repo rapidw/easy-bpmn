@@ -3,25 +3,28 @@ package io.rapidw.easybpmn
 import com.fasterxml.jackson.databind.ObjectMapper
 import io.rapidw.easybpmn.engine.ProcessEngine
 import io.rapidw.easybpmn.engine.ProcessEngineConfig
-import io.rapidw.easybpmn.engine.repository.TaskInstanceRepository
+import io.rapidw.easybpmn.engine.runtime.ProcessInstance
+import io.rapidw.easybpmn.engine.runtime.TaskCandidate
 import io.rapidw.easybpmn.engine.serialization.*
+import io.rapidw.easybpmn.query.TaskInstanceQuery
 import io.rapidw.easybpmn.registry.ProcessRegistry
 import io.rapidw.easybpmn.registry.ProcessRegistryConfig
-import io.rapidw.easybpmn.query.TaskInstanceQuery
+import spock.lang.Shared
 import spock.lang.Specification
 
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 
-class ProcessEngineSpec extends Specification {
-//    RepositoryService repositoryService = Spy()
-//    RuntimeService runtimeService = Stub()
-    TaskInstanceRepository taskService = Stub()
-//    HistoryService historyService = Stub()
+class TaskInstanceQuerySpec extends Specification {
 
-    def "process engine"() {
-        given:
-        ObjectMapper objectMapper = new ObjectMapper()
+    @Shared
+    ProcessRegistry registry
+    @Shared
+    ProcessEngine engine
+    @Shared
+    ProcessInstance processInstance
+
+    def setupSpec() {
 
         def bpmn = new Bpmn()
         def definition = new Definition()
@@ -30,7 +33,7 @@ class ProcessEngineSpec extends Specification {
         process.setName("test_name")
         process.setId("test_id")
 
-        def startEvent = new StartEvent();
+        def startEvent = new StartEvent()
         startEvent.setId("startEvent")
         process.getFlowElements().add(startEvent)
 
@@ -41,6 +44,10 @@ class ProcessEngineSpec extends Specification {
         def userTask = new UserTask()
         userTask.setId("user_task")
         userTask.setName("user_task_name")
+        userTask.getCandidates().add(new TaskCandidate.Candidate(
+            name: "aaa",
+            type: Candidate.USER
+        ))
         process.getFlowElements().add(userTask)
 
         def sf1 = new SequenceFlow()
@@ -53,33 +60,47 @@ class ProcessEngineSpec extends Specification {
         sf2.setSourceRef(userTask.getId())
         sf2.setTargetRef(endEvent.getId())
 
-        process.getSequenceFlows().addAll(sf1, sf2)
+        process.getFlowElements().addAll(sf1, sf2)
         definition.getProcesses().add(process)
         bpmn.setDefinitions(definition)
 
+
+        def objectMapper = new ObjectMapper()
         def str = objectMapper.writeValueAsString(bpmn)
         println str
 
-//        def another_process = objectMapper.readValue(str, Bpmn.class)
+        def registryConfig = ProcessRegistryConfig.builder()
+            .candidateEnumClass(Candidate).build()
+        registry = new ProcessRegistry(registryConfig)
 
-        def registryConfig = ProcessRegistryConfig.builder().build()
-        def registry = new ProcessRegistry(registryConfig)
-
-        def engineConfig = ProcessEngineConfig.builder().build()
-        def engine = new ProcessEngine(registry, engineConfig)
-
+        def engineConfig = ProcessEngineConfig.builder()
+            .build()
+        engine = new ProcessEngine(registry, engineConfig)
         def processDefinition = registry.deploy(str)
 
         def variable = new MyVariable()
-        def processInstance = engine.startProcessInstanceById(processDefinition, variable)
+        this.processInstance = engine.startProcessInstanceById(processDefinition, variable)
         new CountDownLatch(1).await(1, TimeUnit.SECONDS)
-        def tasks = processInstance.queryTask(TaskInstanceQuery.builder().id(1).build())
-        new CountDownLatch(1).await(1, TimeUnit.SECONDS)
-        tasks[0].complete(new Apply().setReason("apply"))
-        new CountDownLatch(1).await(Integer.MAX_VALUE, TimeUnit.SECONDS)
-        expect:
-        1 == 1
-
     }
 
+    enum Candidate {
+        USER,
+        GROUP
+    }
+
+    def "query by id"() {
+        when:
+        def tasks = engine.queryTask(TaskInstanceQuery.builder().processInstanceId(this.processInstance.getId()).build())
+        then:
+
+        tasks.size() == 1
+        with(tasks[0]) {
+            it.processInstance.getId() == this.processInstance.getId()
+            userTaskId == 'user_task'
+            candidates.collect { it.candidate } as Set == [new TaskCandidate.Candidate(
+                name: "aaa",
+                type: Candidate.USER
+            )] as Set
+        }
+    }
 }

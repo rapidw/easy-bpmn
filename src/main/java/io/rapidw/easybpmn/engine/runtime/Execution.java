@@ -24,7 +24,7 @@ public class Execution {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Getter
-    private Integer id;
+    private Long id;
 
     @ToString.Exclude
     @ManyToOne(cascade = CascadeType.REFRESH)
