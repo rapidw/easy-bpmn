@@ -1,6 +1,8 @@
 package io.rapidw.easybpmn.engine.model;
 
+import io.rapidw.easybpmn.ProcessEngineException;
 import io.rapidw.easybpmn.engine.ProcessEngine;
+import io.rapidw.easybpmn.engine.operation.AbstractOperation;
 import io.rapidw.easybpmn.engine.operation.EnterFlowElementOperation;
 import io.rapidw.easybpmn.engine.operation.LeaveFlowElementOperation;
 import io.rapidw.easybpmn.engine.runtime.Execution;
@@ -8,29 +10,35 @@ import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Slf4j
 public abstract class FlowNodeBehavior {
     protected ProcessEngine processEngine;
     protected Execution execution;
 
-    public void onEnter(Execution execution) {
+    public List<AbstractOperation> onEnter(Execution execution) {
         prepare(execution);
-        onEnter();
+        return onEnter();
     }
 
-    protected void onEnter() {
+    // default
+    protected List<AbstractOperation> onEnter() {
         notImplemented();
+        return null;
     }
 
-    public void onLeave(Execution execution) {
+    public List<AbstractOperation> onLeave(Execution execution) {
         prepare(execution);
-        onLeave();
+        return onLeave();
     }
 
-    protected void onLeave() {
+    // default
+    protected List<AbstractOperation> onLeave() {
         notImplemented();
+        return null;
     }
 
     private void prepare(Execution execution) {
@@ -38,19 +46,17 @@ public abstract class FlowNodeBehavior {
         this.execution = execution;
     }
 
-    protected void planLeave() {
-        planLeave(this.execution);
+    protected List<AbstractOperation> planLeave() {
+        return planLeave(this.execution);
     }
 
-    protected void planLeave(Execution execution) {
-        execution.getProcessEngine().addOperation(
-            LeaveFlowElementOperation.builder()
+    protected List<AbstractOperation> planLeave(Execution execution) {
+        return List.of(LeaveFlowElementOperation.builder()
                 .executionId(execution.getId())
-                .build()
-        );
+                .build());
     }
 
-    protected void planLeave(Execution currentExecution, List<SequenceFlow> sequenceFlows) {
+    protected List<AbstractOperation> planEnter(Execution currentExecution, List<SequenceFlow> sequenceFlows) {
         List<Execution> executions = new ArrayList<>(sequenceFlows.size());
         // reuse current execution
         currentExecution.setCurrentFlowElementId(sequenceFlows.get(0).getId());
@@ -67,16 +73,16 @@ public abstract class FlowNodeBehavior {
                 .build();
             executions.add(child);
         }
-        executions.forEach(this::planLeave);
+        return executions.stream().map(this::planEnter).flatMap(List::stream).collect(Collectors.toList());
     }
 
-    protected void planEnter(Execution execution) {
-        execution.getProcessEngine().addOperation(EnterFlowElementOperation.builder()
+    protected List<AbstractOperation> planEnter(Execution execution) {
+        return List.of(EnterFlowElementOperation.builder()
             .executionId(execution.getId())
             .build());
     }
 
-    protected void doLeave() {
+    protected List<AbstractOperation> doLeave() {
 
         val outgoingSequenceFlows = getOutgoingOfCurrentFlowNode(this.execution);
         if (!outgoingSequenceFlows.isEmpty()) {
@@ -102,14 +108,17 @@ public abstract class FlowNodeBehavior {
                     outgoingExecutions.add(child);
                 }
             }
-            outgoingExecutions.forEach(this::planEnter);
+            return outgoingExecutions.stream().map(execution -> EnterFlowElementOperation.builder()
+                .executionId(execution.getId())
+                .build()).collect(Collectors.toList());
         } else {
             log.debug("execution finished");
+            return Collections.emptyList();
         }
     }
 
     private void notImplemented() {
-        log.debug("not implement behavior");
+        throw new ProcessEngineException("not implement behavior");
     }
 
     protected List<SequenceFlow> getOutgoingOfCurrentFlowNode(Execution execution) {

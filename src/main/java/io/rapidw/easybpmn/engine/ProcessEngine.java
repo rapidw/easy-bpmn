@@ -119,7 +119,6 @@ public class ProcessEngine {
             processInstance.getExecutions().add(execution);
 //        this.processEngine.getProcessInstanceRepository().merge(processInstance);
 
-
             operationExecutor.addOperation(EnterFlowElementOperation.builder()
                 .executionId(execution.getId())
                 .build()

@@ -3,6 +3,7 @@ package io.rapidw.easybpmn
 import com.fasterxml.jackson.databind.ObjectMapper
 import io.rapidw.easybpmn.engine.ProcessEngine
 import io.rapidw.easybpmn.engine.ProcessEngineConfig
+import io.rapidw.easybpmn.engine.common.ExpressionType
 import io.rapidw.easybpmn.engine.serialization.*
 import io.rapidw.easybpmn.registry.ProcessRegistry
 import io.rapidw.easybpmn.registry.ProcessRegistryConfig
@@ -40,7 +41,7 @@ class Process2Spec extends Specification {
 
         def computeTask = new ServiceTask()
         computeTask.setId("computeTask")
-        computeTask.setExpression('${variable.x=3}')
+        computeTask.setExpression('${variable.setX(3)}')
         process.getFlowElements().add(computeTask)
 
         def inclusiveGateway = new InclusiveGateway()
@@ -73,6 +74,7 @@ class Process2Spec extends Specification {
         sf3.setSourceRef(exclusiveGateway.getId())
         sf3.setTargetRef(computeTask.getId())
         sf3.setConditionExpression('${variable.x > 1}')
+        sf3.setExpressionType(ExpressionType.EL)
         process.getFlowElements().add(sf3)
 
         def sf4 = new SequenceFlow()

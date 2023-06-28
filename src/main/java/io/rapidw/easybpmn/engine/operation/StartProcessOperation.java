@@ -6,6 +6,8 @@ import io.rapidw.easybpmn.engine.runtime.Variable;
 import lombok.experimental.SuperBuilder;
 import lombok.val;
 
+import java.util.List;
+
 @SuperBuilder
 public class StartProcessOperation extends AbstractOperation {
 
@@ -19,7 +21,7 @@ public class StartProcessOperation extends AbstractOperation {
     }
 
     @Override
-    public void execute() {
+    public List<AbstractOperation> execute() {
 // save variable
         val variable = new Variable(processEngine.getObjectMapper(), this.variable);
         processEngine.getVariableRepository().persist(variable);
@@ -41,7 +43,7 @@ public class StartProcessOperation extends AbstractOperation {
         processInstance.getExecutions().add(execution);
 //        this.processEngine.getProcessInstanceRepository().merge(processInstance);
 
-        processEngine.addOperation(EnterFlowElementOperation.builder()
+        return List.of(EnterFlowElementOperation.builder()
             .executionId(execution.getId())
             .build()
         );

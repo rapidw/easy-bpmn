@@ -82,6 +82,8 @@ public class TaskInstance {
             throw new ProcessEngineException("task has no assignee");
         }
 
+        log.debug("current execution: {}, current flow element {}", this.getExecution().getId(), this.getExecution().getCurrentFlowElementId());
+
         val childId = TransactionUtils.callWithTransaction(this.getProcessEngine(), () -> {
 
             // save variable
@@ -99,6 +101,8 @@ public class TaskInstance {
             this.getExecution().getChildren().add(child);
             this.processEngine.getExecutionRepository().persist(child);
             this.getExecution().setActive(false);
+
+
 
             // set variable to process instance
 //        this.processInstance.getVariable().setJson(this.variable.getJson());

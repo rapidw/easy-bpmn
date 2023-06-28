@@ -16,7 +16,8 @@ public class TaskInstanceRepository extends AbstractRepository<TaskInstance> {
     }
 
     public List<TaskInstance> query(TaskInstanceQuery taskInstanceQuery) {
-        JPAQuery<TaskInstance> executionJPAQuery = new JPAQuery<>(getEntityManager());
+        val entityManager = getEntityManager();
+        JPAQuery<TaskInstance> executionJPAQuery = new JPAQuery<>(entityManager);
         val q = QTaskInstance.taskInstance;
         val builder = new BooleanBuilder();
         if (taskInstanceQuery.getId() != null) {
@@ -27,10 +28,9 @@ public class TaskInstanceRepository extends AbstractRepository<TaskInstance> {
         }
         if (taskInstanceQuery.getCandidates() != null) {
             for (val assignment : taskInstanceQuery.getCandidates()) {
-                // todo: test it
                 builder.and(q.candidates.any().candidate.eq(assignment));
             }
         }
-        return executionJPAQuery.from(q).where(builder).fetch();
+        return executionJPAQuery.from(q).where(builder).fetch().stream().peek(entityManager::refresh).toList();
     }
 }

@@ -1,9 +1,12 @@
 package io.rapidw.easybpmn.engine.model;
 
+import io.rapidw.easybpmn.engine.operation.AbstractOperation;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
+
+import java.util.List;
 
 @Getter
 @Setter
@@ -14,7 +17,7 @@ public class ParallelGateway extends Gateway {
         public final static ParallelGateway.ParallelGatewayBehavior INSTANCE = new ParallelGateway.ParallelGatewayBehavior();
 
         @Override
-        public void onEnter() {
+        public List<AbstractOperation> onEnter() {
             // enter: wait for all incoming sequence flows
             log.debug("enter parallel gateway {} in process instance {}", execution.getCurrentFlowElementId(), execution.getProcessInstance().getId());
             val currentGateway = ((ParallelGateway) execution.getProcessEngine().getProcessDefinitionManager().get(execution.getProcessInstance().getDeploymentId())
@@ -31,8 +34,9 @@ public class ParallelGateway extends Gateway {
 
             // leave: leave all outgoing sequence flows, ignore condition expression
             if (leave) {
-                planLeave(execution, currentGateway.getOutgoing());
+                planEnter(execution, currentGateway.getOutgoing());
             }
+            return null;
         }
     }
 }

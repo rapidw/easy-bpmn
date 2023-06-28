@@ -1,7 +1,10 @@
 package io.rapidw.easybpmn.engine.model;
 
+import io.rapidw.easybpmn.engine.operation.AbstractOperation;
 import lombok.Getter;
 import lombok.Setter;
+
+import java.util.List;
 
 @Getter
 @Setter
@@ -11,13 +14,13 @@ public class StartEvent extends Event {
         public static final NoneStartEventBehavior INSTANCE = new NoneStartEventBehavior();
 
         @Override
-        protected void onEnter() {
-            planLeave();
+        protected List<AbstractOperation> onEnter() {
+            return planLeave();
         }
 
         @Override
-        protected void onLeave() {
-            doLeave();
+        protected List<AbstractOperation> onLeave() {
+            return doLeave();
         }
 
     }

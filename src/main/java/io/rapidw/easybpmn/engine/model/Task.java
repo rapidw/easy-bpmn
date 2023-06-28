@@ -7,12 +7,4 @@ import lombok.Setter;
 @Setter
 public class Task extends Activity {
 
-    public static class TaskActivityBehavior extends FlowNodeBehavior {
-        public static final TaskActivityBehavior INSTANCE = new TaskActivityBehavior();
-
-        @Override
-        public void onEnter() {
-            // do nothing
-        }
-    }
 }

@@ -8,6 +8,8 @@ import io.rapidw.easybpmn.utils.TransactionUtils;
 import lombok.experimental.SuperBuilder;
 import lombok.extern.slf4j.Slf4j;
 
+import java.util.List;
+
 @Slf4j
 @SuperBuilder
 public abstract class AbstractOperation {
@@ -19,17 +21,21 @@ public abstract class AbstractOperation {
     protected FlowElement currentFlowElement;
 
     public void execute(ProcessEngine processEngine) {
-        TransactionUtils.callWithTransaction(processEngine,() -> {
+        List<AbstractOperation> nextOperations = TransactionUtils.callWithTransaction(processEngine,() -> {
             this.processEngine = processEngine;
             this.execution = this.processEngine.getExecutionRepository().get(this.executionId);
             this.currentFlowElement = this.processEngine.getProcessDefinitionManager().get(this.execution.getProcessInstance().getDeploymentId()).getProcess().getFlowElementMap().get(this.execution.getCurrentFlowElementId());
             log.debug("execute operation {}, current flow element {}, execution id {}", this.getClass().getSimpleName(), this.execution.getCurrentFlowElementId(), this.executionId);
-            execute();
-            return null;
+            return execute();
         });
+        if (nextOperations != null) {
+            nextOperations.forEach(processEngine::addOperation);
+        } else {
+            log.error("operation list is null");
+        }
     }
 
-    public abstract void execute();
+    public abstract List<AbstractOperation> execute();
 
     protected AbstractOperation(Long executionId) {
         this.executionId = executionId;
@@ -37,21 +43,5 @@ public abstract class AbstractOperation {
 
     protected void notImplemented() {
         throw new ProcessEngineException("invalid flow node " + execution.getCurrentFlowElementId());
-    }
-
-    protected void planLeaveFlowElementOperation(Execution execution) {
-        planOperation(LeaveFlowElementOperation.builder()
-            .executionId(execution.getId())
-            .build());
-    }
-
-    protected void planContinueProcessOperation(Execution execution) {
-        planOperation(EnterFlowElementOperation.builder()
-            .executionId(execution.getId())
-            .build());
-    }
-
-    private void planOperation(AbstractOperation operation) {
-        processEngine.addOperation(operation);
     }
 }

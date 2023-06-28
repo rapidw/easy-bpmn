@@ -1,12 +1,15 @@
 package io.rapidw.easybpmn.engine.model;
 
 import io.rapidw.easybpmn.engine.common.ExpressionType;
+import io.rapidw.easybpmn.engine.operation.AbstractOperation;
 import io.rapidw.easybpmn.engine.runtime.Execution;
 import io.rapidw.easybpmn.engine.runtime.Variable;
 import io.rapidw.easybpmn.utils.ElUtils;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.val;
+
+import java.util.List;
 
 @Getter
 @Setter
@@ -17,14 +20,14 @@ public class ServiceTask extends Task {
 
     private String expression;
     private String delegateExpression;
-    // todo
+    // todo: support groovy
     private ExpressionType expressionType;
     private String javaClass;
 
     public class ServiceTaskBehavior extends FlowNodeBehavior {
 
         @Override
-        public void onEnter() {
+        public List<AbstractOperation> onEnter() {
             var object = execution.getVariable().deserialize(execution.getProcessEngine().getObjectMapper());
             val objectDup = execution.getVariable().deserialize(execution.getProcessEngine().getObjectMapper());
             ElUtils.evaluateCondition(execution, expression, object, Object.class);
@@ -43,10 +46,15 @@ public class ServiceTask extends Task {
                 execution.getProcessInstance().setVariable(variable);
                 execution.setActive(false);
                 child.setProcessEngine(execution.getProcessEngine());
-                planLeave(child);
+                return planLeave(child);
             } else {
-                planLeave(execution);
+                return planLeave(execution);
             }
+        }
+
+        @Override
+        protected List<AbstractOperation> onLeave() {
+            return doLeave();
         }
     }
 }

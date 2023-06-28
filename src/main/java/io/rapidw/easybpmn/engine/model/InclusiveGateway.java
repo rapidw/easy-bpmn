@@ -1,6 +1,7 @@
 package io.rapidw.easybpmn.engine.model;
 
 import io.rapidw.easybpmn.ProcessEngineException;
+import io.rapidw.easybpmn.engine.operation.AbstractOperation;
 import io.rapidw.easybpmn.engine.runtime.Execution;
 import lombok.Getter;
 import lombok.Setter;
@@ -8,6 +9,7 @@ import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 @Getter
@@ -20,7 +22,7 @@ public class InclusiveGateway extends Gateway {
     public class InclusiveGatewayBehavior extends FlowNodeBehavior {
 
         @Override
-        public void onEnter() {
+        public List<AbstractOperation> onEnter() {
             // enter inclusive gateway: wait for all available incoming sequence flows to arrive
             log.debug("enter inclusive gateway {} in process instance {}", execution.getCurrentFlowElementId(), execution.getProcessInstance().getId());
             val activeExecutions = execution.getProcessEngine().getExecutionRepository().getAllActiveExecutionByProcessInstance(execution.getProcessInstance());
@@ -45,17 +47,19 @@ public class InclusiveGateway extends Gateway {
                         && sequenceFlow.getExpressionType().evaluateToBoolean(execution, sequenceFlow.getConditionExpression(), variableObject)) {
                         targetFlows.add(sequenceFlow);
                     }
-                    if (targetFlows.isEmpty()) {
-                        if (getDefaultFlow() != null) {
-                            targetFlows.add(getDefaultFlow());
-                        } else {
-                            throw new ProcessEngineException("no outgoing sequence flow found in inclusive gateway");
-                        }
+                    if (targetFlows.isEmpty() && defaultFlow != null) {
+                        targetFlows.add(defaultFlow);
+                    }
+                    if (targetFlows.isEmpty() && getOutgoing().size() == 1 && getOutgoing().get(0).getConditionExpression() == null) {
+                        targetFlows.add(getOutgoing().get(0));
+                    } else {
+                        throw new ProcessEngineException("no outgoing sequence flow found in inclusive gateway");
                     }
 
-                    planLeave(execution, targetFlows);
+                    return planEnter(execution, targetFlows);
                 }
             }
+            return Collections.emptyList();
         }
 
         private boolean mayHavePathToCurrentElement(String currentFlowElementId, Execution execution) {

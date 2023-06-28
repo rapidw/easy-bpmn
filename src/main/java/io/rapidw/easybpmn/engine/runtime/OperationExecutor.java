@@ -43,9 +43,7 @@ public class OperationExecutor {
 
     public void addOperation(AbstractOperation operation) {
         log.debug("add operation {}", operation.getClass().getSimpleName());
-        this.executorService.submit(() -> {
-            operation.execute(this.processEngine);
-        });
+        this.executorService.submit(() -> operation.execute(this.processEngine));
     }
 
     private static class MyThreadFactory implements ThreadFactory {
@@ -60,7 +58,6 @@ public class OperationExecutor {
         @Override
         public Thread newThread(Runnable runnable) {
             val thread = new Thread(() -> {
-//
                 runnable.run();
                 entityManagerThreadLocal.get().close();
                 entityManagerThreadLocal.remove();
