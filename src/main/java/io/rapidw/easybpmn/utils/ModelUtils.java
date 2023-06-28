@@ -19,7 +19,7 @@ public class ModelUtils {
             if (fe instanceof StartEvent startEvent) {
                 val startEventModel = new io.rapidw.easybpmn.engine.model.StartEvent();
                 startEventModel.setId(startEvent.getId());
-                startEventModel.setFlowElementBehavior(io.rapidw.easybpmn.engine.model.StartEvent.NoneStartEventBehavior.INSTANCE);
+                startEventModel.setFlowNodeBehavior(io.rapidw.easybpmn.engine.model.StartEvent.NoneStartEventBehavior.INSTANCE);
                 processModel.setInitialFlowElement(startEventModel); // todo : set initial flow element
                 flowElement = startEventModel;
             } else if (fe instanceof UserTask userTask) {
@@ -28,39 +28,39 @@ public class ModelUtils {
                 userTaskModel.setName(userTask.getName());
                 userTaskModel.setAssignee(userTask.getAssignee());
                 userTaskModel.setCandidates(userTask.getCandidates());
-                userTaskModel.setFlowElementBehavior(userTaskModel.new UserTaskBehavior());
+                userTaskModel.setFlowNodeBehavior(userTaskModel.new UserTaskBehavior());
                 flowElement = userTaskModel;
             } else if (fe instanceof EndEvent endEvent) {
                 val endEventModel = new io.rapidw.easybpmn.engine.model.EndEvent();
                 endEventModel.setId(endEvent.getId());
                 endEventModel.setName(endEvent.getName());
-                endEventModel.setFlowElementBehavior(io.rapidw.easybpmn.engine.model.EndEvent.NoneEndEventBehavior.INSTANCE);
+                endEventModel.setFlowNodeBehavior(io.rapidw.easybpmn.engine.model.EndEvent.NoneEndEventBehavior.INSTANCE);
                 flowElement = endEventModel;
             } else if (fe instanceof ExclusiveGateway exclusiveGateway) {
                 val exclusiveGatewayModel = new io.rapidw.easybpmn.engine.model.ExclusiveGateway();
                 exclusiveGatewayModel.setId(exclusiveGateway.getId());
                 exclusiveGatewayModel.setName(exclusiveGateway.getName());
-                exclusiveGatewayModel.setFlowElementBehavior(exclusiveGatewayModel.new ExclusiveGatewayBehavior());
+                exclusiveGatewayModel.setFlowNodeBehavior(exclusiveGatewayModel.new ExclusiveGatewayBehavior());
                 flowElement = exclusiveGatewayModel;
                 needPostProcess.add(new FlowElementTuple(exclusiveGatewayModel, exclusiveGateway));
             } else if (fe instanceof ParallelGateway parallelGateway) {
                 val parallelGatewayModel = new io.rapidw.easybpmn.engine.model.ParallelGateway();
                 parallelGatewayModel.setId(parallelGateway.getId());
                 parallelGatewayModel.setName(parallelGateway.getName());
-                parallelGatewayModel.setFlowElementBehavior(io.rapidw.easybpmn.engine.model.ParallelGateway.ParallelGatewayBehavior.INSTANCE);
+                parallelGatewayModel.setFlowNodeBehavior(io.rapidw.easybpmn.engine.model.ParallelGateway.ParallelGatewayBehavior.INSTANCE);
                 flowElement = parallelGatewayModel;
             } else if (fe instanceof InclusiveGateway inclusiveGateway) {
                 val inclusiveGatewayModel = new io.rapidw.easybpmn.engine.model.InclusiveGateway();
                 inclusiveGatewayModel.setId(inclusiveGateway.getId());
                 inclusiveGatewayModel.setName(inclusiveGateway.getName());
-                inclusiveGatewayModel.setFlowElementBehavior(inclusiveGatewayModel.new InclusiveGatewayBehavior());
+                inclusiveGatewayModel.setFlowNodeBehavior(inclusiveGatewayModel.new InclusiveGatewayBehavior());
                 flowElement = inclusiveGatewayModel;
             } else if (fe instanceof ServiceTask serviceTask) {
                 val serviceTaskModel = new io.rapidw.easybpmn.engine.model.ServiceTask();
                 serviceTaskModel.setId(serviceTask.getId());
                 serviceTaskModel.setName(serviceTask.getName());
                 serviceTaskModel.setExpression(serviceTask.getExpression());
-                serviceTaskModel.setFlowElementBehavior(serviceTaskModel.new ServiceTaskBehavior());
+                serviceTaskModel.setFlowNodeBehavior(serviceTaskModel.new ServiceTaskBehavior());
                 flowElement = serviceTaskModel;
             } else if (fe instanceof SequenceFlow sequenceFlow) {
                 sfs.add(sequenceFlow);

@@ -42,8 +42,8 @@ public class OperationExecutor {
     }
 
     public void addOperation(AbstractOperation operation) {
+        log.debug("add operation {}", operation.getClass().getSimpleName());
         this.executorService.submit(() -> {
-            log.debug("EXECUTING OPERATION {}", operation.getClass().getSimpleName());
             operation.execute(this.processEngine);
         });
     }

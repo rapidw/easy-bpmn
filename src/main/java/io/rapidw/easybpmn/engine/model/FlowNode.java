@@ -11,5 +11,5 @@ import java.util.List;
 public class FlowNode extends FlowElement {
     private List<SequenceFlow> incoming = new ArrayList<>();
     private List<SequenceFlow> outgoing = new ArrayList<>();
-    private FlowElementBehavior flowElementBehavior;
+    private FlowNodeBehavior flowNodeBehavior;
 }

@@ -7,7 +7,18 @@ import lombok.Setter;
 @Setter
 public class StartEvent extends Event {
 
-    public static class NoneStartEventBehavior extends FlowElementBehavior {
+    public static class NoneStartEventBehavior extends FlowNodeBehavior {
         public static final NoneStartEventBehavior INSTANCE = new NoneStartEventBehavior();
+
+        @Override
+        protected void onEnter() {
+            planLeave();
+        }
+
+        @Override
+        protected void onLeave() {
+            doLeave();
+        }
+
     }
 }

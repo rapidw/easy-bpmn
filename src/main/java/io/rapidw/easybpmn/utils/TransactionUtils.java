@@ -4,15 +4,15 @@ import io.rapidw.easybpmn.ProcessEngineException;
 import io.rapidw.easybpmn.engine.ProcessEngine;
 import jakarta.persistence.EntityManager;
 
-import java.util.concurrent.Callable;
+import java.util.function.Supplier;
 
 public class TransactionUtils {
 
-    public static  <V> V runWithTransaction(ProcessEngine processEngine, Callable<V> callable) {
+    public static <V> V callWithTransaction(ProcessEngine processEngine, Supplier<V> supplier) {
         EntityManager entityManager = processEngine.getEntityManagerThreadLocal().get();
         entityManager.getTransaction().begin();
         try {
-            V v = callable.call();
+            V v = supplier.get();
             entityManager.getTransaction().commit();
             return v;
         } catch (Exception e) {

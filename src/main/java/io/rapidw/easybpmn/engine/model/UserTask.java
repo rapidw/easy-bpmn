@@ -1,7 +1,6 @@
 package io.rapidw.easybpmn.engine.model;
 
 import io.rapidw.easybpmn.engine.common.Candidate;
-import io.rapidw.easybpmn.engine.runtime.Execution;
 import io.rapidw.easybpmn.engine.runtime.TaskCandidate;
 import io.rapidw.easybpmn.engine.runtime.TaskInstance;
 import lombok.Getter;
@@ -18,10 +17,10 @@ public class UserTask extends Task {
     private String assignee;
     private List<Candidate> candidates;
 
-    public class UserTaskBehavior extends FlowElementBehavior {
+    public class UserTaskBehavior extends FlowNodeBehavior {
 
         @Override
-        public void onEnter(Execution execution) {
+        public void onEnter() {
             val taskCandidates = new ArrayList<TaskCandidate>(candidates.size());
             candidates.forEach(candidate -> {
                 val taskCandidate = new TaskCandidate();
@@ -38,6 +37,11 @@ public class UserTask extends Task {
                 .build();
             execution.getProcessEngine().getTaskInstanceRepository().persist(taskInstance);
             taskCandidates.forEach(taskCandidate -> taskCandidate.setTaskInstance(taskInstance));
+        }
+
+        @Override
+        protected void onLeave() {
+            doLeave();
         }
     }
 }

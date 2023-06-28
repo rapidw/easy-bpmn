@@ -12,8 +12,9 @@ public class EnterFlowElementOperation extends AbstractOperation {
 
     @Override
     public void execute() {
+        log.debug("enter flow element {}", execution.getCurrentFlowElementId());
         if (currentFlowElement instanceof FlowNode flowNode) {
-            handleFlowNode(flowNode);
+            flowNode.getFlowNodeBehavior().onEnter(execution);
         } else if (currentFlowElement instanceof SequenceFlow sequenceFlow) {
             handleSequenceFlow(sequenceFlow);
         } else {
@@ -22,12 +23,9 @@ public class EnterFlowElementOperation extends AbstractOperation {
     }
 
     private void handleFlowNode(FlowNode flowNode) {
-        flowNode.getFlowElementBehavior().onEnter(execution);
+
     }
 
-    private void notImplemented() {
-        throw new ProcessEngineException("invalid flow node " + currentFlowElement.getId() + " of type" + currentFlowElement.getClass().getSimpleName());
-    }
 
     private void handleSequenceFlow(SequenceFlow sequenceFlow) {
         this.execution.setCurrentFlowElementId(sequenceFlow.getTargetRef().getId());

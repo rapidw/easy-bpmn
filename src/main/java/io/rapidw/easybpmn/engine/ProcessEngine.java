@@ -98,7 +98,7 @@ public class ProcessEngine {
         val definition = ProcessDefinition.builder().processEngine(this).deployment(deployments.get(0)).build();
         processDefinitionManager.put(id, definition);
 
-        return TransactionUtils.runWithTransaction(this, () -> {
+        return TransactionUtils.callWithTransaction(this, () -> {
             // save variable
             val variable = new Variable(objectMapper, variableObject);
             variableRepository.persist(variable);

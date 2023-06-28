@@ -2,7 +2,6 @@ package io.rapidw.easybpmn.engine.model;
 
 import io.rapidw.easybpmn.ProcessEngineException;
 import io.rapidw.easybpmn.engine.operation.EnterFlowElementOperation;
-import io.rapidw.easybpmn.engine.runtime.Execution;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.val;
@@ -13,10 +12,10 @@ public class ExclusiveGateway extends Gateway {
 
     private SequenceFlow defaultFlow;
 
-    public class ExclusiveGatewayBehavior extends FlowElementBehavior {
+    public class ExclusiveGatewayBehavior extends FlowNodeBehavior {
 
         @Override
-        public void onEnter(Execution execution) {
+        public void onEnter() {
             // get all outgoing sequence flows
             SequenceFlow targetFlow = null;
             for (SequenceFlow sequenceFlow : getOutgoing()) {

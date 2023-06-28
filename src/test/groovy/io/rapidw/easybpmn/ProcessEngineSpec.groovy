@@ -53,7 +53,7 @@ class ProcessEngineSpec extends Specification {
         sf2.setSourceRef(userTask.getId())
         sf2.setTargetRef(endEvent.getId())
 
-        process.getSequenceFlows().addAll(sf1, sf2)
+        process.getFlowElements().addAll(sf1, sf2)
         definition.getProcesses().add(process)
         bpmn.setDefinitions(definition)
 
@@ -73,9 +73,9 @@ class ProcessEngineSpec extends Specification {
         def variable = new MyVariable()
         def processInstance = engine.startProcessInstanceById(processDefinition, variable)
         new CountDownLatch(1).await(1, TimeUnit.SECONDS)
-        def tasks = processInstance.queryTask(TaskInstanceQuery.builder().id(1).build())
+        def tasks = engine.queryTask(TaskInstanceQuery.builder().id(1).build())
         new CountDownLatch(1).await(1, TimeUnit.SECONDS)
-        tasks[0].complete(new Apply().setReason("apply"))
+        tasks[0].complete(new MyVariable().setX(1))
         new CountDownLatch(1).await(Integer.MAX_VALUE, TimeUnit.SECONDS)
         expect:
         1 == 1

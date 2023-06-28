@@ -1,11 +1,10 @@
 package io.rapidw.easybpmn.engine.operation;
 
+import io.rapidw.easybpmn.ProcessEngineException;
 import io.rapidw.easybpmn.engine.ProcessEngine;
 import io.rapidw.easybpmn.engine.model.FlowElement;
 import io.rapidw.easybpmn.engine.runtime.Execution;
-import io.rapidw.easybpmn.engine.runtime.ProcessDefinition;
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.EntityTransaction;
+import io.rapidw.easybpmn.utils.TransactionUtils;
 import lombok.experimental.SuperBuilder;
 import lombok.extern.slf4j.Slf4j;
 
@@ -17,32 +16,27 @@ public abstract class AbstractOperation {
 
     protected ProcessEngine processEngine;
     protected Execution execution;
-    protected ProcessDefinition processDefinition;
     protected FlowElement currentFlowElement;
-    private EntityTransaction transaction;
 
     public void execute(ProcessEngine processEngine) {
-        this.transaction = getEntityManager(processEngine).getTransaction();
-        this.transaction.begin();
-        try {
+        TransactionUtils.callWithTransaction(processEngine,() -> {
             this.processEngine = processEngine;
-            log.debug("operation execution id: {}", this.executionId);
             this.execution = this.processEngine.getExecutionRepository().get(this.executionId);
-            this.processDefinition = processEngine.getProcessDefinitionManager().get(execution.getProcessInstance().getDeploymentId());
-            this.currentFlowElement = this.processDefinition.getProcess().getFlowElementMap().get(this.execution.getCurrentFlowElementId());
-            log.debug("execute operation: {}, current flow element {}", this.getClass().getSimpleName(), this.execution.getCurrentFlowElementId());
+            this.currentFlowElement = this.processEngine.getProcessDefinitionManager().get(this.execution.getProcessInstance().getDeploymentId()).getProcess().getFlowElementMap().get(this.execution.getCurrentFlowElementId());
+            log.debug("execute operation {}, current flow element {}, execution id {}", this.getClass().getSimpleName(), this.execution.getCurrentFlowElementId(), this.executionId);
             execute();
-            this.transaction.commit();
-        } catch (Exception e) {
-            this.transaction.rollback();
-            throw e;
-        }
+            return null;
+        });
     }
 
     public abstract void execute();
 
     protected AbstractOperation(Long executionId) {
         this.executionId = executionId;
+    }
+
+    protected void notImplemented() {
+        throw new ProcessEngineException("invalid flow node " + execution.getCurrentFlowElementId());
     }
 
     protected void planLeaveFlowElementOperation(Execution execution) {
@@ -59,9 +53,5 @@ public abstract class AbstractOperation {
 
     private void planOperation(AbstractOperation operation) {
         processEngine.addOperation(operation);
-    }
-
-    private EntityManager getEntityManager(ProcessEngine processEngine) {
-        return processEngine.getEntityManagerThreadLocal().get();
     }
 }

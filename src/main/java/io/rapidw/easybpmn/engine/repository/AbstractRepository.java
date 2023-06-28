@@ -1,5 +1,6 @@
 package io.rapidw.easybpmn.engine.repository;
 
+import io.rapidw.easybpmn.ProcessEngineException;
 import jakarta.persistence.EntityManager;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
@@ -40,9 +41,12 @@ public class AbstractRepository<T> {
         log.debug("get {} by id {}", clazz.getSimpleName(), id);
         val entityManager = getEntityManager();
         val res = entityManager.find(clazz, id);
-        entityManager.refresh(res);
-        return res;
-//        return null;
+        if (res != null) {
+            entityManager.refresh(res);
+            return res;
+        } else {
+            throw new ProcessEngineException("cannot find " + clazz.getSimpleName() + " by id " + id);
+        }
     }
 
     public void flush() {

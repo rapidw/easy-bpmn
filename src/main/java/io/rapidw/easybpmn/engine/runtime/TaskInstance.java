@@ -78,11 +78,11 @@ public class TaskInstance {
 
     public void complete(Object variableObject) {
         // when task has candidate, it must has assignee when complete
-        if (this.candidates != null && this.getAssignee() == null) {
+        if (!this.candidates.isEmpty() && this.getAssignee() == null) {
             throw new ProcessEngineException("task has no assignee");
         }
 
-        TransactionUtils.runWithTransaction(this.getProcessEngine(), () -> {
+        val childId = TransactionUtils.callWithTransaction(this.getProcessEngine(), () -> {
 
             // save variable
             var variable = new Variable(processEngine.getObjectMapper(), variableObject);
@@ -104,13 +104,12 @@ public class TaskInstance {
 //        this.processInstance.getVariable().setJson(this.variable.getJson());
             this.getExecution().getProcessInstance().setVariable(variable);
 //        processInstanceService.updateVariable(taskInstance.getExecution().getProcessInstance(), variable);
-
-            processEngine.addOperation(LeaveFlowElementOperation.builder()
-                .executionId(child.getId())
-                .build());
-            log.debug("completing task instance: {}", this.id);
-            return null;
+            return child.getId();
         });
+        processEngine.addOperation(LeaveFlowElementOperation.builder()
+            .executionId(childId)
+            .build());
+        log.debug("completing task instance: {}", this.id);
     }
 
     public <T> T getVariable(Class<T> clazz) {
@@ -128,7 +127,7 @@ public class TaskInstance {
     }
 
     public void claim(String claimant) {
-        if (this.assignee == null) {
+        if (this.assignee.isEmpty()) {
             throw new ProcessEngineException("task has been claimed");
         } else {
             if (this.candidates == null) {

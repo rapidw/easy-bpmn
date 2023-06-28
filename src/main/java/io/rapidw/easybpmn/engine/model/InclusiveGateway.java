@@ -17,10 +17,10 @@ public class InclusiveGateway extends Gateway {
 
     private SequenceFlow defaultFlow;
 
-    public class InclusiveGatewayBehavior extends FlowElementBehavior {
+    public class InclusiveGatewayBehavior extends FlowNodeBehavior {
 
         @Override
-        public void onEnter(Execution execution) {
+        public void onEnter() {
             // enter inclusive gateway: wait for all available incoming sequence flows to arrive
             log.debug("enter inclusive gateway {} in process instance {}", execution.getCurrentFlowElementId(), execution.getProcessInstance().getId());
             val activeExecutions = execution.getProcessEngine().getExecutionRepository().getAllActiveExecutionByProcessInstance(execution.getProcessInstance());
@@ -53,7 +53,7 @@ public class InclusiveGateway extends Gateway {
                         }
                     }
 
-                    leave(execution, targetFlows);
+                    planLeave(execution, targetFlows);
                 }
             }
         }

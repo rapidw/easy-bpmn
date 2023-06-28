@@ -21,10 +21,10 @@ public class ServiceTask extends Task {
     private ExpressionType expressionType;
     private String javaClass;
 
-    public class ServiceTaskBehavior extends FlowElementBehavior {
+    public class ServiceTaskBehavior extends FlowNodeBehavior {
 
         @Override
-        public void onEnter(Execution execution) {
+        public void onEnter() {
             var object = execution.getVariable().deserialize(execution.getProcessEngine().getObjectMapper());
             val objectDup = execution.getVariable().deserialize(execution.getProcessEngine().getObjectMapper());
             ElUtils.evaluateCondition(execution, expression, object, Object.class);
@@ -43,9 +43,9 @@ public class ServiceTask extends Task {
                 execution.getProcessInstance().setVariable(variable);
                 execution.setActive(false);
                 child.setProcessEngine(execution.getProcessEngine());
-                leave(child);
+                planLeave(child);
             } else {
-                leave(execution);
+                planLeave(execution);
             }
         }
     }
