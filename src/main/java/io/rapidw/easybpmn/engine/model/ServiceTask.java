@@ -4,7 +4,6 @@ import io.rapidw.easybpmn.engine.common.ExpressionType;
 import io.rapidw.easybpmn.engine.operation.AbstractOperation;
 import io.rapidw.easybpmn.engine.runtime.Execution;
 import io.rapidw.easybpmn.engine.runtime.Variable;
-import io.rapidw.easybpmn.utils.ElUtils;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.val;
@@ -30,7 +29,7 @@ public class ServiceTask extends Task {
         public List<AbstractOperation> onEnter() {
             var object = execution.getVariable().deserialize(execution.getProcessEngine().getObjectMapper());
             val objectDup = execution.getVariable().deserialize(execution.getProcessEngine().getObjectMapper());
-            ElUtils.evaluateCondition(execution, expression, object, Object.class);
+            expressionType.evaluateToObject(execution, expression, object);
             if (!objectDup.equals(object)) {
                 val variable = new Variable(execution.getProcessEngine().getObjectMapper(), object);
 

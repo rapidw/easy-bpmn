@@ -6,6 +6,7 @@ import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 
+import java.util.Collections;
 import java.util.List;
 
 @Getter
@@ -36,7 +37,7 @@ public class ParallelGateway extends Gateway {
             if (leave) {
                 planEnter(execution, currentGateway.getOutgoing());
             }
-            return null;
+            return Collections.emptyList();
         }
     }
 }

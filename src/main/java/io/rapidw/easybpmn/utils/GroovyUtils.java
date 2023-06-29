@@ -16,7 +16,7 @@ public class GroovyUtils {
         }
     }
 
-    private static Object evaluateExpression(Execution execution, String expression, Object variableObject) {
+    public static Object evaluateExpression(Execution execution, String expression, Object variableObject) {
         Binding binding = new Binding();
         binding.setProperty("execution", execution);
         binding.setProperty("processInstance", execution.getProcessInstance());

@@ -13,10 +13,10 @@ public class ElUtils {
     public static Logger logger = log;
 
     public static Boolean evaluateToBoolean(Execution execution, String conditionExpression, Object variableObject) {
-        return evaluateCondition(execution, conditionExpression, variableObject, Boolean.class);
+        return evaluateExpression(execution, conditionExpression, variableObject, Boolean.class);
     }
 
-    public static <T> T evaluateCondition(Execution execution, String conditionExpression, Object variableObject, Class<T> clazz) {
+    public static <T> T evaluateExpression(Execution execution, String conditionExpression, Object variableObject, Class<T> clazz) {
         val manager = new ELManager();
         manager.defineBean("execution", execution);
         manager.defineBean("processInstance", execution.getProcessInstance());
